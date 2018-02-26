@@ -19,8 +19,8 @@ def ids_to_ips(ids, region=None):
         try:
             for reservation in client.describe_instances(InstanceIds=[instance_id])['Reservations']:
                 for instance in reservation['Instances']:
-                    yield {'public_ip': instance.get('PublicIpAddress'),
-                           'private_ip': instance.get('PrivateIpAddress')}
+                    yield {'public-ip': instance.get('PublicIpAddress'),
+                           'private-ip': instance.get('PrivateIpAddress')}
         except:
             pass
 
@@ -43,7 +43,7 @@ def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('values', nargs='*')
     parser.add_argument('--from', help='input type', choices=['id', 'asg', 'elb'], default='id', dest='input')
-    parser.add_argument('--to', help='output type', choices=['id', 'public_ip', 'private_ip'], default='public_ip', dest='output')
+    parser.add_argument('--to', help='output type', choices=['id', 'public-ip', 'private-ip'], default='public-ip', dest='output')
     parser.add_argument('--region', help='region')
     args = parser.parse_args()
     if args.input == 'id':
@@ -55,7 +55,7 @@ def main():
     if args.output == 'id':
         print ','.join(ids)
     else:
-        ips = [ip[args.output] or ip['private_ip'] for ip in ids_to_ips(ids, region=args.region)]
+        ips = [ip[args.output] or ip['private-ip'] for ip in ids_to_ips(ids, region=args.region)]
         print ','.join(filter(None, ips))
 
 
