@@ -1,5 +1,4 @@
-#!/usr/bin/env python2
-# coding = utf-8
+#!/usr/bin/env python3
 
 import argparse
 import re
@@ -53,10 +52,10 @@ def main():
     elif args.input == 'elb':
         ids = elbs_to_ids(args.values, region=args.region)
     if args.output == 'id':
-        print ','.join(ids)
+        print(','.join(ids))
     else:
         ips = [ip[args.output] or ip['private-ip'] for ip in ids_to_ips(ids, region=args.region)]
-        print ','.join(filter(None, ips))
+        print(','.join(filter(None, ips)))
 
 
 if __name__ == '__main__':
