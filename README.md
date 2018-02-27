@@ -19,11 +19,11 @@ aws configure
 
 You might also want to add something similar to your aliases:
 ```
-alias awsutil='~/Code/awsutil/awsutil.py'
+alias awsutil='~/Code/awsutil/awsutil'
 alias fabutil='fab --skip-bad-hosts --warn-only -f ~/Code/awsutil/fabfile.py'
 ```
 
-* [`awsutil`](awsutil.py) allows you to convert from AWS resources (instances, ASGs and ELBs) to a list of instance IDs/IPs.
+* [`awsutil`](awsutil) allows you to convert from AWS resources (instances, ASGs and ELBs) to a list of instance IDs/IPs.
 * [`fabutil`](fabfile.py) allows you to execute commands on multiple servers.
 
 ## Using `awsutil`
@@ -57,7 +57,7 @@ alias fabutil='fab --skip-bad-hosts --warn-only -f ~/Code/awsutil/fabfile.py'
 * By default, `awsutil` will print public IPs whenever possible (private IP otherwise). Use `--to` to adjust output format:
 
     ```
-    $ awsutil --to private_ip host-a-ff9b72e46eaddbb87-b host-b-965ff8b526ba83f8e-c
+    $ awsutil --to private-ip host-a-ff9b72e46eaddbb87-b host-b-965ff8b526ba83f8e-c
     10.20.123.1,10.20.123.2
     ```
 
@@ -95,7 +95,7 @@ Check out the [Fabric docs](http://docs.fabfile.org/en/1.14/usage/fab.html) for 
 
 ```
 $ awsutil -h                     
-usage: awsutil.py [-h] [--from {id,asg,elb}] [--to {id,public_ip,private_ip}]
+usage: awsutil [-h] [--from {id,asg,elb}] [--to {id,public_ip,private_ip}]
               [--region REGION]
               [values [values ...]]
 
@@ -105,7 +105,7 @@ positional arguments:
 optional arguments:
   -h, --help                     show this help message and exit
   --from {id,asg,elb}            input type (default: id)
-  --to {id,public_ip,private_ip} output type (default: public_ip)
+  --to {id,public-ip,private-ip} output type (default: public-ip)
   --region REGION                region (default: None)
 ```
 
