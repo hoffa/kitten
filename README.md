@@ -1,5 +1,7 @@
 # 🚒 awsutil
 
+[![Maintainability](https://api.codeclimate.com/v1/badges/c47c16854e850f077fbb/maintainability)](https://codeclimate.com/github/hoffa/awsutil/maintainability)
+
 Easily manage multiple servers and automate tasks. Especially when production is burning.
 
 ![This is fine](https://i.imgur.com/ck8tvNd.png)
