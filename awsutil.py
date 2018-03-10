@@ -20,7 +20,7 @@ def ids_to_ips(ids, region=None):
                 for instance in reservation['Instances']:
                     yield {'public-ip': instance.get('PublicIpAddress'),
                            'private-ip': instance.get('PrivateIpAddress')}
-        except:
+        except Exception:
             pass
 
 
@@ -38,13 +38,17 @@ def elbs_to_ids(elbs, region=None):
             yield instance['InstanceId']
 
 
-def main():
+def parse_args():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('values', nargs='*')
     parser.add_argument('--from', help='input type', choices=['id', 'asg', 'elb'], default='id', dest='input')
-    parser.add_argument('--to', help='output type', choices=['id', 'public-ip', 'private-ip'], default='public-ip', dest='output')
+    parser.add_argument('--to', help='output type', choices=['id', 'public-ip', 'private-ip'], default='private-ip', dest='output')
     parser.add_argument('--region', help='region')
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
     if args.input == 'id':
         ids = find_ids(args.values)
     elif args.input == 'asg':
