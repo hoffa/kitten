@@ -8,59 +8,84 @@ import boto3
 
 def find_ids(l):
     for s in l:
-        for match in re.findall('[0-9a-f]{8,17}', s):
-            yield 'i-' + match
+        for match in re.findall("[0-9a-f]{8,17}", s):
+            yield "i-" + match
 
 
 def ids_to_ips(ids, region=None):
-    client = boto3.client('ec2', region_name=region)
+    client = boto3.client("ec2", region_name=region)
     for instance_id in find_ids(ids):
         try:
-            for reservation in client.describe_instances(InstanceIds=[instance_id])['Reservations']:
-                for instance in reservation['Instances']:
-                    yield {'public-ip': instance.get('PublicIpAddress'),
-                           'private-ip': instance.get('PrivateIpAddress')}
+            for reservation in client.describe_instances(InstanceIds=[instance_id])[
+                "Reservations"
+            ]:
+                for instance in reservation["Instances"]:
+                    yield {
+                        "public-ip": instance.get("PublicIpAddress"),
+                        "private-ip": instance.get("PrivateIpAddress"),
+                    }
         except Exception:
             pass
 
 
 def asgs_to_ids(asgs, region=None):
-    client = boto3.client('autoscaling', region_name=region)
-    for asg in client.describe_auto_scaling_groups(AutoScalingGroupNames=asgs)['AutoScalingGroups']:
-        for instance in asg['Instances']:
-            yield instance['InstanceId']
+    client = boto3.client("autoscaling", region_name=region)
+    for asg in client.describe_auto_scaling_groups(AutoScalingGroupNames=asgs)[
+        "AutoScalingGroups"
+    ]:
+        for instance in asg["Instances"]:
+            yield instance["InstanceId"]
 
 
 def elbs_to_ids(elbs, region=None):
-    client = boto3.client('elb', region_name=region)
-    for elb in client.describe_load_balancers(LoadBalancerNames=elbs)['LoadBalancerDescriptions']:
-        for instance in elb['Instances']:
-            yield instance['InstanceId']
+    client = boto3.client("elb", region_name=region)
+    for elb in client.describe_load_balancers(LoadBalancerNames=elbs)[
+        "LoadBalancerDescriptions"
+    ]:
+        for instance in elb["Instances"]:
+            yield instance["InstanceId"]
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('values', nargs='*')
-    parser.add_argument('--from', help='input type', choices=['id', 'asg', 'elb'], default='id', dest='input')
-    parser.add_argument('--to', help='output type', choices=['id', 'public-ip', 'private-ip'], default='private-ip', dest='output')
-    parser.add_argument('--region', help='region')
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    parser.add_argument("values", nargs="*")
+    parser.add_argument(
+        "--from",
+        help="input type",
+        choices=["id", "asg", "elb"],
+        default="id",
+        dest="input",
+    )
+    parser.add_argument(
+        "--to",
+        help="output type",
+        choices=["id", "public-ip", "private-ip"],
+        default="private-ip",
+        dest="output",
+    )
+    parser.add_argument("--region", help="region")
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
-    if args.input == 'id':
+    if args.input == "id":
         ids = find_ids(args.values)
-    elif args.input == 'asg':
+    elif args.input == "asg":
         ids = asgs_to_ids(args.values, region=args.region)
-    elif args.input == 'elb':
+    elif args.input == "elb":
         ids = elbs_to_ids(args.values, region=args.region)
-    if args.output == 'id':
-        print(','.join(ids))
+    if args.output == "id":
+        print(",".join(ids))
     else:
-        ips = [ip[args.output] or ip['private-ip'] for ip in ids_to_ips(ids, region=args.region)]
-        print(','.join(filter(None, ips)))
+        ips = [
+            ip[args.output] or ip["private-ip"]
+            for ip in ids_to_ips(ids, region=args.region)
+        ]
+        print(",".join(filter(None, ips)))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
