@@ -2,7 +2,6 @@
 
 import argparse
 import re
-import sys
 
 import boto3
 from fabric import Connection
