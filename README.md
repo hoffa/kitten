@@ -1,7 +1,6 @@
 # 🚒 damn
 
-[![Build Status](https://travis-ci.org/hoffa/damn.svg?branch=master)](https://travis-ci.org/hoffa/damn) [![Maintainability](https://api.codeclimate.com/v1/badges/c47c16854e850f077fbb/maintainability)](https://codeclimate.com/github/hoffa/awsutil/maintainability)
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fhoffa%2Fdamn.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fhoffa%2Fdamn?ref=badge_shield)
+[![Build Status](https://travis-ci.org/hoffa/damn.svg?branch=master)](https://travis-ci.org/hoffa/damn) [![Maintainability](https://api.codeclimate.com/v1/badges/c47c16854e850f077fbb/maintainability)](https://codeclimate.com/github/hoffa/awsutil/maintainability) [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fhoffa%2Fdamn.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fhoffa%2Fdamn?ref=badge_shield) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
 Easily manage multiple servers and automate tasks. Especially when production is burning.
 
@@ -34,7 +33,3 @@ Run command on 10 instances at a time:
 ```
 $ ./damn.py aws asg big-prod-asg | xargs -L 10 ./damn.py ssh --sudo 'service nginx restart' ubuntu
 ```
-
-
-## License
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fhoffa%2Fdamn.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fhoffa%2Fdamn?ref=badge_large)
