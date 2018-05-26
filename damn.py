@@ -17,8 +17,8 @@ def find_ids(l):
             yield "i-" + match
 
 
-def ids_to_ips(ids, region=None):
-    client = boto3.client("ec2", region_name=region)
+def ids_to_ips(ids, region_name=None):
+    client = boto3.client("ec2", region_name=region_name)
     for instance_id in find_ids(ids):
         try:
             for reservation in client.describe_instances(InstanceIds=[instance_id])[
@@ -26,15 +26,15 @@ def ids_to_ips(ids, region=None):
             ]:
                 for instance in reservation["Instances"]:
                     yield {
-                        "public-ip": instance.get("PublicIpAddress"),
-                        "private-ip": instance.get("PrivateIpAddress"),
+                        "public": instance.get("PublicIpAddress"),
+                        "private": instance.get("PrivateIpAddress"),
                     }
         except Exception:
             pass
 
 
-def asgs_to_ids(asgs, region=None):
-    client = boto3.client("autoscaling", region_name=region)
+def asgs_to_ids(asgs, region_name=None):
+    client = boto3.client("autoscaling", region_name=region_name)
     for asg in client.describe_auto_scaling_groups(AutoScalingGroupNames=asgs)[
         "AutoScalingGroups"
     ]:
@@ -42,8 +42,8 @@ def asgs_to_ids(asgs, region=None):
             yield instance["InstanceId"]
 
 
-def elbs_to_ids(elbs, region=None):
-    client = boto3.client("elb", region_name=region)
+def elbs_to_ids(elbs, region_name=None):
+    client = boto3.client("elb", region_name=region_name)
     for elb in client.describe_load_balancers(LoadBalancerNames=elbs)[
         "LoadBalancerDescriptions"
     ]:
@@ -51,36 +51,28 @@ def elbs_to_ids(elbs, region=None):
             yield instance["InstanceId"]
 
 
-def dispatch(command, host, user, connect_kwargs):
-    print(f"running command on {host}")
-    with Connection(host, user=user, connect_kwargs=connect_kwargs) as c:
-        c.run(command)
-
-
 def aws(args):
-    if args.input == "id":
+    if args.type == "id":
         ids = find_ids(args.values)
-    elif args.input == "asg":
-        ids = asgs_to_ids(args.values, region=args.region)
-    elif args.input == "elb":
-        ids = elbs_to_ids(args.values, region=args.region)
-    if args.output == "id":
-        print(" ".join(ids))
-    else:
-        ips = [
-            ip[args.output] or ip["private-ip"]
-            for ip in ids_to_ips(ids, region=args.region)
-        ]
-        print(" ".join(filter(None, ips)))
+    elif args.type == "asg":
+        ids = asgs_to_ids(args.values, region_name=args.region)
+    elif args.type == "elb":
+        ids = elbs_to_ids(args.values, region_name=args.region)
+    kind = "private" if args.private else "public"
+    for ip in ids_to_ips(ids, region_name=args.region):
+        print(ip[kind] or ip["private"])
 
 
 def ssh(args):
-    print("bar", args)
-    print(yellow("hosts: ") + " ".join(args.hosts))
-    print(yellow("user: ") + args.user)
-    print(yellow("command: ") + args.command)
     for host in args.hosts:
-        dispatch(args.command, host, args.user, {"key_filename": args.i})
+        print(f"{yellow(host)} {args.command}")
+        with Connection(
+            host, user=args.user, connect_kwargs={"key_filename": args.i}
+        ) as c:
+            if args.sudo:
+                c.sudo(args.command)
+            else:
+                c.run(args.command)
 
 
 def main():
@@ -89,8 +81,8 @@ def main():
 
     aws_parser = subparsers.add_parser("aws")
     aws_parser.add_argument("--region")
-    aws_parser.add_argument("input", choices=("id", "asg", "elb"))
-    aws_parser.add_argument("output", choices=("id", "public-ip", "private-ip"))
+    aws_parser.add_argument("--private", action="store_true")
+    aws_parser.add_argument("type", choices=("id", "asg", "elb"))
     aws_parser.add_argument("values", nargs="+")
     aws_parser.set_defaults(func=aws)
 
