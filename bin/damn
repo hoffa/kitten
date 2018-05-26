@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import argparse
 import re
@@ -65,7 +65,7 @@ def aws(args):
 
 
 def run(host, user, connect_kwargs, command, sudo):
-    print(f"{yellow(host)} {command}")
+    print(yellow(host) + " " + command)
     with fabric.Connection(host, user=user, connect_kwargs=connect_kwargs) as c:
         if sudo:
             c.sudo(command)
