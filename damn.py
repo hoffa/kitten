@@ -1,9 +1,15 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import argparse
 import re
+import sys
 
 import boto3
+from fabric import Connection
+
+
+def yellow(s):
+    return "\033[33m" + s + "\033[0m"
 
 
 def find_ids(l):
@@ -46,31 +52,13 @@ def elbs_to_ids(elbs, region=None):
             yield instance["InstanceId"]
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
-    )
-    parser.add_argument("values", nargs="*")
-    parser.add_argument(
-        "--from",
-        help="input type",
-        choices=["id", "asg", "elb"],
-        default="id",
-        dest="input",
-    )
-    parser.add_argument(
-        "--to",
-        help="output type",
-        choices=["id", "public-ip", "private-ip"],
-        default="private-ip",
-        dest="output",
-    )
-    parser.add_argument("--region", help="region")
-    return parser.parse_args()
+def dispatch(command, host, user, connect_kwargs):
+    print(f"running command on {host}")
+    with Connection(host, user=user, connect_kwargs=connect_kwargs) as c:
+        c.run(command)
 
 
-def main():
-    args = parse_args()
+def aws(args):
     if args.input == "id":
         ids = find_ids(args.values)
     elif args.input == "asg":
@@ -78,13 +66,45 @@ def main():
     elif args.input == "elb":
         ids = elbs_to_ids(args.values, region=args.region)
     if args.output == "id":
-        print(",".join(ids))
+        print(" ".join(ids))
     else:
         ips = [
             ip[args.output] or ip["private-ip"]
             for ip in ids_to_ips(ids, region=args.region)
         ]
-        print(",".join(filter(None, ips)))
+        print(" ".join(filter(None, ips)))
+
+
+def ssh(args):
+    print("bar", args)
+    print(yellow("hosts: ") + " ".join(args.hosts))
+    print(yellow("user: ") + args.user)
+    print(yellow("command: ") + args.command)
+    for host in args.hosts:
+        dispatch(args.command, host, args.user, {"key_filename": args.i})
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers()
+
+    aws_parser = subparsers.add_parser("aws")
+    aws_parser.add_argument("--region")
+    aws_parser.add_argument("input", choices=("id", "asg", "elb"))
+    aws_parser.add_argument("output", choices=("id", "public-ip", "private-ip"))
+    aws_parser.add_argument("values", nargs="+")
+    aws_parser.set_defaults(func=aws)
+
+    ssh_parser = subparsers.add_parser("ssh")
+    ssh_parser.add_argument("-i")
+    ssh_parser.add_argument("--sudo", action="store_true")
+    ssh_parser.add_argument("command")
+    ssh_parser.add_argument("user")
+    ssh_parser.add_argument("hosts", nargs="+")
+    ssh_parser.set_defaults(func=ssh)
+
+    args = parser.parse_args()
+    args.func(args)
 
 
 if __name__ == "__main__":
