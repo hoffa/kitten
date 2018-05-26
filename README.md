@@ -1,122 +1,33 @@
-# 🚒 awsutil
+# 🚒 damn
 
-[![Build Status](https://travis-ci.org/hoffa/damn.svg?branch=master)](https://travis-ci.org/hoffa/damn) [![Maintainability](https://api.codeclimate.com/v1/badges/c47c16854e850f077fbb/maintainability)](https://codeclimate.com/github/hoffa/awsutil/maintainability)
+[![Build Status](https://travis-ci.org/hoffa/damn.svg?branch=master)](https://travis-ci.org/hoffa/damn) [![Maintainability](https://api.codeclimate.com/v1/badges/c47c16854e850f077fbb/maintainability)](https://codeclimate.com/github/hoffa/awsutil/maintainability) [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fhoffa%2Fdamn.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fhoffa%2Fdamn?ref=badge_shield) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
-Easily manage multiple servers and automate tasks. Especially when production is burning.
+Easily manage multiple servers. Especially when production is burning.
 
-![This is fine](https://i.imgur.com/ck8tvNd.png)
+## Examples
 
-## Getting started
-
-Install the dependencies:
+Get IPs in Auto Scaling group:
 
 ```
-pip install awscli fabric boto3
+$ ./damn.py aws asg my-asg-name
+18.105.107.20
+34.229.135.48
+52.211.230.162
+54.108.254.142
+184.53.6.59
 ```
 
-Set up AWS credentials and default region:
-```
-aws configure
-```
-
-You might also want to add something similar to your aliases:
-```
-alias awsutil='~/Code/awsutil/awsutil'
-alias fabutil='fab --skip-bad-hosts --warn-only -f ~/Code/awsutil/fabfile.py'
-```
-
-* [`awsutil`](awsutil) allows you to convert from AWS resources (instances, ASGs and ELBs) to a list of instance IDs/IPs.
-* [`fabutil`](fabfile.py) allows you to execute commands on multiple servers.
-
-## Using `awsutil`
-
-* Get IPs from instance IDs:
-
-    ```
-    $ awsutil i-ff9b72e46eaddbb87 i-965ff8b526ba83f8e
-    12.123.234.5,23.123.234.123
-    ```
-
-* You can also pass any messy text (e.g. quickly copied from a log) and it will automatically find the instance IDs:
-
-    ```
-    $ awsutil host-a-ff9b72e46eaddbb87-b host-b-965ff8b526ba83f8e-c
-    12.123.234.5,23.123.234.123
-    ```
-
-* Works also for ASGs and ELBs:
-
-    ```
-    $ awsutil --from asg prod-content-server
-    12.123.234.5,23.123.234.123
-    ```
-
-    ```
-    $ awsutil --from elb prod-process-external
-    12.123.234.5,23.123.234.123
-    ```
-
-* By default, `awsutil` will print public IPs whenever possible (private IP otherwise). Use `--to` to adjust output format:
-
-    ```
-    $ awsutil --to private-ip host-a-ff9b72e46eaddbb87-b host-b-965ff8b526ba83f8e-c
-    10.20.123.1,10.20.123.2
-    ```
-
-    ```
-    $ awsutil --from elb --to id prod-process-external
-    i-ff9b72e46eaddbb87 i-965ff8b526ba83f8e
-    ```
-
-## Using `fabutil`
-
-`fabutil` is just a tiny layer over vanilla [Fabric](http://www.fabfile.org). It allows you to execute commands on a list a servers.
-
-As a silly example, to see a server's uptime, you could do:
+Run command:
 
 ```
-$ fabutil run:uptime -H 12.123.234.5 -u ubuntu
-[12.123.234.5] out:  08:18:25 up 19:28,  1 user,  load average: 2.83, 3.62, 3.55
+$ ./damn.py ssh uptime ubuntu 18.105.107.20 34.229.135.48
+18.105.107.20 uptime
+34.229.135.48 uptime
+ 17:11:48 up 1 day,  6:02,  0 users,  load average: 0.91, 2.99, 3.49
+ 17:11:48 up 5 days, 11:19,  0 users,  load average: 6.34, 5.94, 5.72
 ```
 
-Here's a slightly more realistic example:
-
+Run command on 10 instances at a time:
 ```
-$ fabutil \
-  -H `awsutil --from asg prod-content-server` \
-  -u ubuntu \
-  -i ~/.ssh/id_rsa.prod \
-  sudo:"sed -i s/10.20.123.1/10.20.123.255/g /etc/server.conf && service server restart"
-```
-
-By default, `fabutil` will skip unreachable hosts and only warn if a command fails.
-
-Check out the [Fabric docs](http://docs.fabfile.org/en/1.14/usage/fab.html) for a list of supported command-line arguments. The most useful ones are probably [`-H`](http://docs.fabfile.org/en/1.14/usage/fab.html#cmdoption-H), [`-u`](http://docs.fabfile.org/en/1.14/usage/fab.html#cmdoption-u), [`-i`](http://docs.fabfile.org/en/1.14/usage/fab.html#cmdoption-i) and [`--parallel`](http://docs.fabfile.org/en/1.14/usage/fab.html#cmdoption-P).
-
-## Options
-
-```
-$ awsutil -h                     
-usage: awsutil [-h] [--from {id,asg,elb}] [--to {id,public_ip,private_ip}]
-              [--region REGION]
-              [values [values ...]]
-
-positional arguments:
-  values
-
-optional arguments:
-  -h, --help                     show this help message and exit
-  --from {id,asg,elb}            input type (default: id)
-  --to {id,public-ip,private-ip} output type (default: public-ip)
-  --region REGION                region (default: None)
-```
-
-```
-$ fabutil --list                       
-Available commands:                
-
-    get   <path> Download file     
-    put   <local-path>,<remote-path> Upload file                       
-    run   <command> Run command    
-    sudo  <command> Run command as root
+$ ./damn.py aws asg big-prod-asg | xargs -L 10 ./damn.py ssh --sudo 'service nginx restart' ubuntu
 ```
