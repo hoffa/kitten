@@ -2,9 +2,10 @@
 
 import argparse
 import re
+import threading
 
 import boto3
-from fabric import Connection
+import fabric
 
 
 def yellow(s):
@@ -63,16 +64,25 @@ def aws(args):
         print(ip[kind] or ip["private"])
 
 
+def run(host, user, connect_kwargs, command, sudo):
+    print(f"{yellow(host)} {command}")
+    with fabric.Connection(host, user=user, connect_kwargs=connect_kwargs) as c:
+        if sudo:
+            c.sudo(command)
+        else:
+            c.run(command)
+
+
 def ssh(args):
+    threads = []
     for host in args.hosts:
-        print(f"{yellow(host)} {args.command}")
-        with Connection(
-            host, user=args.user, connect_kwargs={"key_filename": args.i}
-        ) as c:
-            if args.sudo:
-                c.sudo(args.command)
-            else:
-                c.run(args.command)
+        thread = threading.Thread(
+            target=run,
+            args=(host, args.user, {"key_filename": args.i}, args.command, args.sudo),
+        )
+        thread.start()
+    for thread in threads:
+        thread.join()
 
 
 def main():
