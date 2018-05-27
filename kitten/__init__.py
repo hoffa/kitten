@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+import io
 import re
 import threading
 
@@ -69,7 +70,11 @@ def run(host, args):
         connect_timeout=args.timeout,
         connect_kwargs={"key_filename": args.i},
     ) as c:
-        (c.sudo if args.sudo else c.run)(args.command)
+        f = io.StringIO()
+        func = c.sudo if args.sudo else c.run
+        func(args.command, out_stream=f, err_stream=f)
+        for line in f.getvalue().splitlines():
+            print(yellow(host) + " " + line)
 
 
 def ssh(args):
