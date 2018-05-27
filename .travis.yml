@@ -1,9 +1,12 @@
 language: python
 python:
+  - "2.7"
+  - "3.4"
+  - "3.5"
   - "3.6"
 install:
   - python setup.py check --metadata --strict
-  - pip install pyflakes
+  - pip install pycodestyle pyflakes
 script:
   - pyflakes .
-  - black --check .
+  - pycodestyle --max-line-length 88 .
