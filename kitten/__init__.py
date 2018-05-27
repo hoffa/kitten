@@ -22,9 +22,8 @@ def ids_to_ips(ids, region_name=None):
     client = boto3.client("ec2", region_name=region_name)
     for instance_id in find_ids(ids):
         try:
-            for reservation in client.describe_instances(InstanceIds=[instance_id])[
-                "Reservations"
-            ]:
+            reservations = client.describe_instances(InstanceIds=[instance_id])
+            for reservation in reservations["Reservations"]:
                 for instance in reservation["Instances"]:
                     yield {
                         "public": instance.get("PublicIpAddress"),
@@ -34,20 +33,18 @@ def ids_to_ips(ids, region_name=None):
             pass
 
 
-def asgs_to_ids(asgs, region_name=None):
+def asgs_to_ids(asg_names, region_name=None):
     client = boto3.client("autoscaling", region_name=region_name)
-    for asg in client.describe_auto_scaling_groups(AutoScalingGroupNames=asgs)[
-        "AutoScalingGroups"
-    ]:
+    asgs = client.describe_auto_scaling_groups(AutoScalingGroupNames=asg_names)
+    for asg in asgs["AutoScalingGroups"]:
         for instance in asg["Instances"]:
             yield instance["InstanceId"]
 
 
-def elbs_to_ids(elbs, region_name=None):
+def elbs_to_ids(elb_names, region_name=None):
     client = boto3.client("elb", region_name=region_name)
-    for elb in client.describe_load_balancers(LoadBalancerNames=elbs)[
-        "LoadBalancerDescriptions"
-    ]:
+    elbs = client.describe_load_balancers(LoadBalancerNames=elb_names)
+    for elb in elbs["LoadBalancerDescriptions"]:
         for instance in elb["Instances"]:
             yield instance["InstanceId"]
 
@@ -67,10 +64,7 @@ def aws(args):
 def run(host, user, connect_kwargs, command, sudo):
     print(yellow(host) + " " + command)
     with fabric.Connection(host, user=user, connect_kwargs=connect_kwargs) as c:
-        if sudo:
-            c.sudo(command)
-        else:
-            c.run(command)
+        (c.sudo if sudo else c.run)(command)
 
 
 def ssh(args):
@@ -104,8 +98,11 @@ def main():
     ssh_parser.add_argument("hosts", nargs="+")
     ssh_parser.set_defaults(func=ssh)
 
-    args = parser.parse_args()
-    args.func(args)
+    try:
+        args = parser.parse_args()
+        args.func(args)
+    except AttributeError:
+        parser.print_help()
 
 
 if __name__ == "__main__":
