@@ -29,9 +29,11 @@ Run command:
 $ kitten ssh uptime ubuntu 18.105.107.20 34.229.135.48
 18.105.107.20 uptime
 34.229.135.48 uptime
- 17:11:48 up 1 day,  6:02,  0 users,  load average: 0.91, 2.99, 3.49
- 17:11:48 up 5 days, 11:19,  0 users,  load average: 6.34, 5.94, 5.72
+18.105.107.20 17:11:48 up 1 day,  6:02,  0 users,  load average: 0.91, 2.99, 3.49
+34.229.135.48 17:11:48 up 5 days, 11:19,  0 users,  load average: 6.34, 5.94, 5.72
 ```
+
+Commands are always run in parallel. Use `xargs` to not overwhelm your host.
 
 Run command on 10 instances at a time:
 ```
