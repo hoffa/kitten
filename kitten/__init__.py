@@ -61,19 +61,21 @@ def aws(args):
         print(ip[kind] or ip["private"])
 
 
-def run(host, user, connect_kwargs, command, sudo):
-    print(yellow(host) + " " + command)
-    with fabric.Connection(host, user=user, connect_kwargs=connect_kwargs) as c:
-        (c.sudo if sudo else c.run)(command)
+def run(host, args):
+    print(yellow(host) + " " + args.command)
+    with fabric.Connection(
+        host,
+        user=args.user,
+        connect_timeout=args.timeout,
+        connect_kwargs={"key_filename": args.i},
+    ) as c:
+        (c.sudo if args.sudo else c.run)(args.command)
 
 
 def ssh(args):
     threads = []
     for host in args.hosts:
-        thread = threading.Thread(
-            target=run,
-            args=(host, args.user, {"key_filename": args.i}, args.command, args.sudo),
-        )
+        thread = threading.Thread(target=run, args=(host, args))
         thread.start()
     for thread in threads:
         thread.join()
@@ -93,6 +95,7 @@ def main():
     ssh_parser = subparsers.add_parser("ssh")
     ssh_parser.add_argument("-i")
     ssh_parser.add_argument("--sudo", action="store_true")
+    ssh_parser.add_argument("--timeout", type=int, default=15)
     ssh_parser.add_argument("command")
     ssh_parser.add_argument("user")
     ssh_parser.add_argument("hosts", nargs="+")
