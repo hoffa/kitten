@@ -1,12 +1,9 @@
 language: python
 python:
-  - "2.7"
-  - "3.4"
-  - "3.5"
   - "3.6"
 install:
-  - pip install .
-  - pip install black pyflakes
+  - python setup.py check --metadata --strict
+  - pip install pyflakes
 script:
   - pyflakes .
   - black --check .

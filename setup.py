@@ -13,10 +13,11 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/hoffa/kitten",
     packages=setuptools.find_packages(),
-    scripts=["bin/kitten"],
+    entry_points={"console_scripts": {"kitten=kitten:main"}},
     install_requires=["boto3>=1.7.0", "fabric>=2.1.0"],
     license="MIT",
     classifiers=(
+        "Development Status :: 4 - Beta",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 2",
