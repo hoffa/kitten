@@ -18,22 +18,19 @@ Get IPs in Auto Scaling group:
 $ kitten aws asg my-asg-name
 18.105.107.20
 34.229.135.48
-52.211.230.162
-54.108.254.142
-184.53.6.59
 ```
 
-Run command:
+Run command on all instances in the Auto Scaling group:
 
 ```
-$ kitten ssh uptime ubuntu 18.105.107.20 34.229.135.48
+$ kitten aws asg my-asg-name | xargs kitten ssh uptime ubuntu
 18.105.107.20 uptime
 34.229.135.48 uptime
 18.105.107.20 17:11:48 up 1 day,  6:02,  0 users,  load average: 0.91, 2.99, 3.49
 34.229.135.48 17:11:48 up 5 days, 11:19,  0 users,  load average: 6.34, 5.94, 5.72
 ```
 
-Commands are always run in parallel. Use `xargs` to not overwhelm your host.
+Commands are always run in parallel. Use `xargs`'s `-L` to not overwhelm your host.
 
 Run command on 10 instances at a time:
 ```
