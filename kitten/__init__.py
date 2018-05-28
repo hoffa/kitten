@@ -52,10 +52,7 @@ def elbs_to_instance_ids(client, elb_names):
 def print_ips(client, instance_ids, public, region_name):
     for chunk in chunks(list(instance_ids), CHUNK_SIZE):
         for ip in instance_ids_to_ips(client, chunk):
-            if public and ip["public"]:
-                print(ip["public"])
-            else:
-                print(ip["private"])
+            print(public and ip["public"] or ip["private"])
 
 
 def ip(values, kind, public, region_name):
