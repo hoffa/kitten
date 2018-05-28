@@ -5,14 +5,13 @@ from __future__ import unicode_literals
 import argparse
 import io
 import os
-import re
 import sys
 import threading
 
 import boto3
 import fabric
 
-__version__ = "0.1.7"
+__version__ = "0.1.8"
 
 DEFAULT_TIMEOUT = 15
 
@@ -21,25 +20,15 @@ def yellow(s):
     return "\033[33m" + s + "\033[0m"
 
 
-def find_ids(l):
-    for s in l:
-        for match in re.findall("[0-9a-f]{8,17}", s):
-            yield "i-" + match
-
-
+# TODO: Batch instance IDs to avoid FilterLimitExceeded
 def ids_to_ips(ids, region_name=None):
-    client = boto3.client("ec2", region_name=region_name)
-    for instance_id in find_ids(ids):
-        try:
-            reservations = client.describe_instances(InstanceIds=[instance_id])
-            for reservation in reservations["Reservations"]:
-                for instance in reservation["Instances"]:
-                    yield {
-                        "public": instance.get("PublicIpAddress"),
-                        "private": instance.get("PrivateIpAddress"),
-                    }
-        except Exception:
-            pass
+    client = boto3.resource("ec2", region_name=region_name)
+    filters = [{"Name": "instance-id", "Values": list(ids)}]
+    for instance in client.instances.filter(Filters=filters):
+        yield {
+            "public": instance.public_ip_address,
+            "private": instance.private_ip_address,
+        }
 
 
 def asgs_to_ids(asg_names, region_name=None):
@@ -60,7 +49,7 @@ def elbs_to_ids(elb_names, region_name=None):
 
 def ip(values, kind, region_name, public):
     if kind == "id":
-        ids = find_ids(values)
+        ids = values
     elif kind == "asg":
         ids = asgs_to_ids(values, region_name=region_name)
     elif kind == "elb":
