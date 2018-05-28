@@ -14,16 +14,20 @@ import fabric
 __version__ = "0.1.8"
 
 DEFAULT_TIMEOUT = 15
+CHUNK_SIZE = 100
 
 
 def yellow(s):
     return "\033[33m" + s + "\033[0m"
 
 
-# TODO: Batch instance IDs to avoid FilterLimitExceeded
-def ids_to_ips(ids, region_name=None):
-    client = boto3.resource("ec2", region_name=region_name)
-    filters = [{"Name": "instance-id", "Values": list(ids)}]
+def chunks(l, n):
+    for i in range(0, len(l), n):
+        yield l[i : i + n]
+
+
+def ids_to_ips(client, ids):
+    filters = [{"Name": "instance-id", "Values": ids}]
     for instance in client.instances.filter(Filters=filters):
         yield {
             "public": instance.public_ip_address,
@@ -31,16 +35,14 @@ def ids_to_ips(ids, region_name=None):
         }
 
 
-def asgs_to_ids(asg_names, region_name=None):
-    client = boto3.client("autoscaling", region_name=region_name)
+def asgs_to_ids(client, asg_names):
     asgs = client.describe_auto_scaling_groups(AutoScalingGroupNames=asg_names)
     for asg in asgs["AutoScalingGroups"]:
         for instance in asg["Instances"]:
             yield instance["InstanceId"]
 
 
-def elbs_to_ids(elb_names, region_name=None):
-    client = boto3.client("elb", region_name=region_name)
+def elbs_to_ids(client, elb_names):
     elbs = client.describe_load_balancers(LoadBalancerNames=elb_names)
     for elb in elbs["LoadBalancerDescriptions"]:
         for instance in elb["Instances"]:
@@ -51,14 +53,18 @@ def ip(values, kind, region_name, public):
     if kind == "id":
         ids = values
     elif kind == "asg":
-        ids = asgs_to_ids(values, region_name=region_name)
+        autoscaling = boto3.client("autoscaling", region_name=region_name)
+        ids = asgs_to_ids(autoscaling, values)
     elif kind == "elb":
-        ids = elbs_to_ids(values, region_name=region_name)
-    for ip in ids_to_ips(ids, region_name=region_name):
-        if public and ip["public"]:
-            print(ip["public"])
-        else:
-            print(ip["private"])
+        elb = boto3.client("elb", region_name=region_name)
+        ids = elbs_to_ids(elb, values)
+    ec2 = boto3.resource("ec2", region_name=region_name)
+    for chunk in chunks(list(ids), CHUNK_SIZE):
+        for ip in ids_to_ips(ec2, chunk):
+            if public and ip["public"]:
+                print(ip["public"])
+            else:
+                print(ip["private"])
 
 
 def run(c, command, sudo):
