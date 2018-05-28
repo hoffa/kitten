@@ -105,9 +105,9 @@ def put(c, local, remote):
     try:
         c.put(local, remote=remote)
     except Exception as e:
-        print("{} {} ({})".format(yellow(c.host), red("fail"), e))
+        print(yellow(c.host) + " " + red(str(e)))
     else:
-        print("{} {}".format(yellow(c.host), green("ok")))
+        print(yellow(c.host) + " " + green("ok"))
     c.close()
 
 
@@ -121,9 +121,9 @@ def get(c, remote):
     try:
         c.get(remote, local=local)
     except Exception as e:
-        print("{} {} ({})".format(yellow(c.host), red("fail"), e))
+        print(yellow(c.host) + " " + red(str(e)))
     else:
-        print("{} {}".format(yellow(c.host), green("ok")))
+        print(yellow(c.host) + " " + green("ok"))
     c.close()
 
 
