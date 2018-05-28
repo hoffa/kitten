@@ -36,3 +36,13 @@ Run command on 10 instances at a time:
 ```
 $ kitten ip asg big-prod-asg | xargs -L 10 kitten run --sudo 'service nginx restart' ubuntu
 ```
+
+Download file:
+```
+$ kitten ip elb big-prod-elb | xargs kitten get /var/log/system.log ubuntu
+```
+
+Upload file:
+```
+$ kitten ip elb big-prod-elb | xargs kitten put nginx.conf /etc/init/nginx.conf ubuntu
+```
