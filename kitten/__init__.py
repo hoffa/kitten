@@ -58,16 +58,18 @@ def elbs_to_ids(elb_names, region_name=None):
             yield instance["InstanceId"]
 
 
-def ip(args):
-    if args.type == "id":
-        ids = find_ids(args.values)
-    elif args.type == "asg":
-        ids = asgs_to_ids(args.values, region_name=args.region)
-    elif args.type == "elb":
-        ids = elbs_to_ids(args.values, region_name=args.region)
-    kind = "private" if args.private else "public"
-    for ip in ids_to_ips(ids, region_name=args.region):
-        print(ip[kind] or ip["private"])
+def ip(values, kind, region_name, public):
+    if kind == "id":
+        ids = find_ids(values)
+    elif kind == "asg":
+        ids = asgs_to_ids(values, region_name=region_name)
+    elif kind == "elb":
+        ids = elbs_to_ids(values, region_name=region_name)
+    for ip in ids_to_ips(ids, region_name=region_name):
+        if public and ip["public"]:
+            print(ip["public"])
+        else:
+            print(ip["private"])
 
 
 def run(c, command, sudo):
@@ -104,8 +106,8 @@ def parse_args():
 
     aws_parser = subparsers.add_parser("ip")
     aws_parser.add_argument("--region")
-    aws_parser.add_argument("--private", action="store_true")
-    aws_parser.add_argument("type", choices=("id", "asg", "elb"))
+    aws_parser.add_argument("--public", action="store_true")
+    aws_parser.add_argument("kind", choices=("id", "asg", "elb"))
     aws_parser.add_argument("values", nargs="+")
 
     ssh_parser = subparsers.add_parser("run")
@@ -142,7 +144,7 @@ def parse_args():
 def main():
     args = parse_args()
     if args.tool == "ip":
-        ip(args)
+        ip(args.values, args.kind, args.region, args.public)
     else:
         cs = [
             fabric.Connection(
@@ -154,11 +156,17 @@ def main():
             for host in args.hosts
         ]
         if args.tool == "run":
-            threads = [threading.Thread(target=run, args=(c, args.command, args.sudo)) for c in cs]
+            threads = [
+                threading.Thread(target=run, args=(c, args.command, args.sudo))
+                for c in cs
+            ]
         elif args.tool == "get":
             threads = [threading.Thread(target=get, args=(c, args.remote)) for c in cs]
         elif args.tool == "put":
-            threads = [threading.Thread(target=put, args=(c, args.local, args.remote)) for c in cs]
+            threads = [
+                threading.Thread(target=put, args=(c, args.local, args.remote))
+                for c in cs
+            ]
         for thread in threads:
             thread.start()
         for thread in threads:
