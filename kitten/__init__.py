@@ -26,8 +26,8 @@ def chunks(l, n):
         yield l[i : i + n]
 
 
-def ids_to_ips(client, ids):
-    filters = [{"Name": "instance-id", "Values": ids}]
+def instance_ids_to_ips(client, instance_ids):
+    filters = [{"Name": "instance-id", "Values": instance_ids}]
     for instance in client.instances.filter(Filters=filters):
         yield {
             "public": instance.public_ip_address,
@@ -35,36 +35,40 @@ def ids_to_ips(client, ids):
         }
 
 
-def asgs_to_ids(client, asg_names):
+def asgs_to_instance_ids(client, asg_names):
     asgs = client.describe_auto_scaling_groups(AutoScalingGroupNames=asg_names)
     for asg in asgs["AutoScalingGroups"]:
         for instance in asg["Instances"]:
             yield instance["InstanceId"]
 
 
-def elbs_to_ids(client, elb_names):
+def elbs_to_instance_ids(client, elb_names):
     elbs = client.describe_load_balancers(LoadBalancerNames=elb_names)
     for elb in elbs["LoadBalancerDescriptions"]:
         for instance in elb["Instances"]:
             yield instance["InstanceId"]
 
 
-def ip(values, kind, region_name, public):
-    if kind == "id":
-        ids = values
-    elif kind == "asg":
-        autoscaling = boto3.client("autoscaling", region_name=region_name)
-        ids = asgs_to_ids(autoscaling, values)
-    elif kind == "elb":
-        elb = boto3.client("elb", region_name=region_name)
-        ids = elbs_to_ids(elb, values)
-    ec2 = boto3.resource("ec2", region_name=region_name)
-    for chunk in chunks(list(ids), CHUNK_SIZE):
-        for ip in ids_to_ips(ec2, chunk):
+def print_ips(client, instance_ids, public, region_name):
+    for chunk in chunks(list(instance_ids), CHUNK_SIZE):
+        for ip in instance_ids_to_ips(client, chunk):
             if public and ip["public"]:
                 print(ip["public"])
             else:
                 print(ip["private"])
+
+
+def ip(values, kind, public, region_name):
+    if kind == "id":
+        instance_ids = values
+    elif kind == "asg":
+        autoscaling = boto3.client("autoscaling", region_name=region_name)
+        instance_ids = asgs_to_instance_ids(autoscaling, values)
+    elif kind == "elb":
+        elb = boto3.client("elb", region_name=region_name)
+        instance_ids = elbs_to_instance_ids(elb, values)
+    ec2 = boto3.resource("ec2", region_name=region_name)
+    print_ips(ec2, instance_ids, public, region_name)
 
 
 def run(c, command, sudo):
@@ -147,7 +151,7 @@ def start_threads(targets):
 def main():
     args = parse_args()
     if args.tool == "ip":
-        ip(args.values, args.kind, args.region, args.public)
+        ip(args.values, args.kind, args.public, args.region)
     else:
         cs = [
             fabric.Connection(
