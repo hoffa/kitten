@@ -112,7 +112,7 @@ def put(cs, local, remote):
     start_threads(threading.Thread(target=ssh_put, args=(c, local, remote)) for c in cs)
 
 
-def parse_args():
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--version", action="version", version="0.1.5")
     subparsers = parser.add_subparsers(dest="tool")
@@ -146,11 +146,7 @@ def parse_args():
     put_parser.add_argument("user")
     put_parser.add_argument("hosts", nargs="+")
 
-    return parser.parse_args()
-
-
-def main():
-    args = parse_args()
+    args = parser.parse_args()
     if not args.tool:
         parser.print_help()
     elif args.tool == "ip":
