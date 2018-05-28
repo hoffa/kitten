@@ -114,6 +114,7 @@ def put(cs, local, remote):
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--version", action="version", version="0.1.5")
     subparsers = parser.add_subparsers(dest="tool")
 
     aws_parser = subparsers.add_parser("ip")
