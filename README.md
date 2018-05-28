@@ -10,6 +10,13 @@ Tiny tool to manage multiple servers.
 pip install kitten
 ```
 
+If you haven't yet, install `awscli` and configure AWS credentials:
+
+```
+pip install awscli
+aws configure
+```
+
 ## Examples
 
 Get IPs in Auto Scaling group:
