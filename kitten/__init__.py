@@ -31,6 +31,14 @@ HELP = {
 }
 
 
+def red(s):
+    return "\033[31m" + s + "\033[0m"
+
+
+def green(s):
+    return "\033[32m" + s + "\033[0m"
+
+
 def yellow(s):
     return "\033[33m" + s + "\033[0m"
 
@@ -94,7 +102,12 @@ def run(c, command, sudo):
 
 def put(c, local, remote):
     print("{} put {} to {}".format(yellow(c.host), yellow(local), yellow(remote)))
-    c.put(local, remote=remote)
+    try:
+        c.put(local, remote=remote)
+    except Exception as e:
+        print("{} {} ({})".format(yellow(c.host), red("fail"), e))
+    else:
+        print("{} {}".format(yellow(c.host), green("ok")))
     c.close()
 
 
@@ -105,7 +118,12 @@ def get(c, remote):
         pass
     local = c.host + "/" + os.path.basename(remote)
     print("{} get {} to {}".format(yellow(c.host), yellow(remote), yellow(local)))
-    c.get(remote, local=local)
+    try:
+        c.get(remote, local=local)
+    except Exception as e:
+        print("{} {} ({})".format(yellow(c.host), red("fail"), e))
+    else:
+        print("{} {}".format(yellow(c.host), green("ok")))
     c.close()
 
 
