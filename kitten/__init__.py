@@ -2,6 +2,7 @@
 
 import argparse
 import io
+import os
 import re
 import threading
 
@@ -77,13 +78,18 @@ def ssh_run(c, command, sudo):
 
 def ssh_put(c, local, remote):
     print("{} put {} to {}".format(yellow(c.host), yellow(local), yellow(remote)))
-    c.put(local, remote)
+    c.put(local, remote=remote)
     c.close()
 
 
 def ssh_get(c, remote):
-    print("{} get {}".format(yellow(c.host), yellow(remote)))
-    c.get(remote)
+    try:
+        os.mkdir(c.host)
+    except OSError:
+        pass
+    local = c.host + "/" + os.path.basename(remote)
+    print("{} get {} to {}".format(yellow(c.host), yellow(remote), yellow(local)))
+    c.get(remote, local=local)
     c.close()
 
 
