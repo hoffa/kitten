@@ -6,6 +6,7 @@ import argparse
 import io
 import os
 import re
+import sys
 import threading
 
 import boto3
@@ -69,7 +70,7 @@ def ip(args):
         print(ip[kind] or ip["private"])
 
 
-def ssh_run(c, command, sudo):
+def run(c, command, sudo):
     print("{} run {}".format(yellow(c.host), yellow(command)))
     f = io.StringIO()
     func = c.sudo if sudo else c.run
@@ -79,13 +80,13 @@ def ssh_run(c, command, sudo):
     c.close()
 
 
-def ssh_put(c, local, remote):
+def put(c, local, remote):
     print("{} put {} to {}".format(yellow(c.host), yellow(local), yellow(remote)))
     c.put(local, remote=remote)
     c.close()
 
 
-def ssh_get(c, remote):
+def get(c, remote):
     try:
         os.mkdir(c.host)
     except OSError:
@@ -96,26 +97,7 @@ def ssh_get(c, remote):
     c.close()
 
 
-def start_threads(threads):
-    for thread in threads:
-        thread.start()
-    for thread in threads:
-        thread.join()
-
-
-def run(cs, command, sudo):
-    start_threads(threading.Thread(target=ssh_run, args=(c, command, sudo)) for c in cs)
-
-
-def get(cs, remote):
-    start_threads(threading.Thread(target=ssh_get, args=(c, remote)) for c in cs)
-
-
-def put(cs, local, remote):
-    start_threads(threading.Thread(target=ssh_put, args=(c, local, remote)) for c in cs)
-
-
-def main():
+def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--version", action="version", version=__version__)
     subparsers = parser.add_subparsers(dest="tool")
@@ -152,7 +134,14 @@ def main():
     args = parser.parse_args()
     if not args.tool:
         parser.print_help()
-    elif args.tool == "ip":
+        sys.exit(2)
+
+    return args
+
+
+def main():
+    args = parse_args()
+    if args.tool == "ip":
         ip(args)
     else:
         cs = [
@@ -165,11 +154,15 @@ def main():
             for host in args.hosts
         ]
         if args.tool == "run":
-            run(cs, args.command, args.sudo)
+            threads = [threading.Thread(target=run, args=(c, args.command, args.sudo)) for c in cs]
         elif args.tool == "get":
-            get(cs, args.remote)
+            threads = [threading.Thread(target=get, args=(c, args.remote)) for c in cs]
         elif args.tool == "put":
-            put(cs, args.local, args.remote)
+            threads = [threading.Thread(target=put, args=(c, args.local, args.remote)) for c in cs]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
 
 
 if __name__ == "__main__":
