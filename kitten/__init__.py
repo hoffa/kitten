@@ -11,6 +11,7 @@ import threading
 import boto3
 import fabric
 
+__version__ = "0.1.6"
 
 DEFAULT_TIMEOUT = 15
 
@@ -116,7 +117,7 @@ def put(cs, local, remote):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--version", action="version", version="0.1.5")
+    parser.add_argument("--version", action="version", version=__version__)
     subparsers = parser.add_subparsers(dest="tool")
 
     aws_parser = subparsers.add_parser("ip")
