@@ -136,6 +136,14 @@ def parse_args():
     return args
 
 
+def start_threads(targets):
+    threads = [threading.Thread(target=target, args=args) for target, args in targets]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+
+
 def main():
     args = parse_args()
     if args.tool == "ip":
@@ -151,21 +159,12 @@ def main():
             for host in args.hosts
         ]
         if args.tool == "run":
-            threads = [
-                threading.Thread(target=run, args=(c, args.command, args.sudo))
-                for c in cs
-            ]
+            targets = [(run, (c, args.command, args.sudo)) for c in cs]
         elif args.tool == "get":
-            threads = [threading.Thread(target=get, args=(c, args.remote)) for c in cs]
+            targets = [(get, (c, args.remote)) for c in cs]
         elif args.tool == "put":
-            threads = [
-                threading.Thread(target=put, args=(c, args.local, args.remote))
-                for c in cs
-            ]
-        for thread in threads:
-            thread.start()
-        for thread in threads:
-            thread.join()
+            targets = [(put, (c, args.local, args.remote)) for c in cs]
+        start_threads(targets)
 
 
 if __name__ == "__main__":
