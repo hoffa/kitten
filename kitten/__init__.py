@@ -9,6 +9,9 @@ import boto3
 import fabric
 
 
+DEFAULT_TIMEOUT = 15
+
+
 def yellow(s):
     return "\033[33m" + s + "\033[0m"
 
@@ -50,7 +53,7 @@ def elbs_to_ids(elb_names, region_name=None):
             yield instance["InstanceId"]
 
 
-def aws(args):
+def ip(args):
     if args.type == "id":
         ids = find_ids(args.values)
     elif args.type == "asg":
@@ -62,55 +65,101 @@ def aws(args):
         print(ip[kind] or ip["private"])
 
 
-def run(host, args):
-    print(yellow(host) + " " + args.command)
-    with fabric.Connection(
-        host,
-        user=args.user,
-        connect_timeout=args.timeout,
-        connect_kwargs={"key_filename": args.i},
-    ) as c:
-        f = io.StringIO()
-        func = c.sudo if args.sudo else c.run
-        func(args.command, out_stream=f, err_stream=f)
-        for line in f.getvalue().splitlines():
-            print(yellow(host) + " " + line)
+def ssh_run(c, command, sudo):
+    print("{} run {}".format(yellow(c.host), yellow(command)))
+    f = io.StringIO()
+    func = c.sudo if sudo else c.run
+    func(command, out_stream=f, err_stream=f)
+    for line in f.getvalue().splitlines():
+        print(yellow(c.host) + " " + line)
+    c.close()
 
 
-def ssh(args):
-    threads = []
-    for host in args.hosts:
-        thread = threading.Thread(target=run, args=(host, args))
+def ssh_put(c, local, remote):
+    print("{} put {} to {}".format(yellow(c.host), yellow(local), yellow(remote)))
+    c.put(local, remote)
+    c.close()
+
+
+def ssh_get(c, remote):
+    print("{} get {}".format(yellow(c.host), yellow(remote)))
+    c.get(remote)
+    c.close()
+
+
+def start_threads(threads):
+    for thread in threads:
         thread.start()
     for thread in threads:
         thread.join()
 
 
+def run(cs, command, sudo):
+    start_threads(threading.Thread(target=ssh_run, args=(c, command, sudo)) for c in cs)
+
+
+def get(cs, remote):
+    start_threads(threading.Thread(target=ssh_get, args=(c, remote)) for c in cs)
+
+
+def put(cs, local, remote):
+    start_threads(threading.Thread(target=ssh_put, args=(c, local, remote)) for c in cs)
+
+
 def main():
     parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers()
+    subparsers = parser.add_subparsers(dest="tool")
 
-    aws_parser = subparsers.add_parser("aws")
+    aws_parser = subparsers.add_parser("ip")
     aws_parser.add_argument("--region")
     aws_parser.add_argument("--private", action="store_true")
     aws_parser.add_argument("type", choices=("id", "asg", "elb"))
     aws_parser.add_argument("values", nargs="+")
-    aws_parser.set_defaults(func=aws)
 
-    ssh_parser = subparsers.add_parser("ssh")
+    ssh_parser = subparsers.add_parser("run")
     ssh_parser.add_argument("-i")
+    ssh_parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT)
     ssh_parser.add_argument("--sudo", action="store_true")
-    ssh_parser.add_argument("--timeout", type=int, default=15)
     ssh_parser.add_argument("command")
     ssh_parser.add_argument("user")
     ssh_parser.add_argument("hosts", nargs="+")
-    ssh_parser.set_defaults(func=ssh)
 
-    try:
-        args = parser.parse_args()
-        args.func(args)
-    except AttributeError:
+    get_parser = subparsers.add_parser("get")
+    get_parser.add_argument("-i")
+    get_parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT)
+    get_parser.add_argument("remote")
+    get_parser.add_argument("user")
+    get_parser.add_argument("hosts", nargs="+")
+
+    put_parser = subparsers.add_parser("put")
+    put_parser.add_argument("-i")
+    put_parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT)
+    put_parser.add_argument("local")
+    put_parser.add_argument("remote")
+    put_parser.add_argument("user")
+    put_parser.add_argument("hosts", nargs="+")
+
+    args = parser.parse_args()
+    if not args.tool:
         parser.print_help()
+    elif args.tool == "ip":
+        ip(args)
+    else:
+        cs = [
+            fabric.Connection(
+                host,
+                user=args.user,
+                connect_timeout=args.timeout,
+                connect_kwargs={"key_filename": args.i},
+            )
+            for host in args.hosts
+        ]
+        if args.tool == "run":
+            run(cs, args.command, args.sudo)
+        elif args.tool == "get":
+            get(cs, args.remote)
+        elif args.tool == "put":
+            put(cs, args.source, args.local)
 
 
 if __name__ == "__main__":
