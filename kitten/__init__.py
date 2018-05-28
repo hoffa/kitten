@@ -165,7 +165,7 @@ def main():
         elif args.tool == "get":
             get(cs, args.remote)
         elif args.tool == "put":
-            put(cs, args.source, args.local)
+            put(cs, args.local, args.remote)
 
 
 if __name__ == "__main__":
