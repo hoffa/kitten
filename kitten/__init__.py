@@ -11,7 +11,7 @@ import threading
 import boto3
 import fabric
 
-__version__ = "0.1.8"
+__version__ = "0.1.9"
 
 TIMEOUT = 15
 CHUNK_SIZE = 100
