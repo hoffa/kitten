@@ -12,7 +12,7 @@ import threading
 import boto3
 import fabric
 
-__version__ = "0.1.6"
+__version__ = "0.1.7"
 
 DEFAULT_TIMEOUT = 15
 
