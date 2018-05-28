@@ -9,4 +9,4 @@ install:
   - pip install pycodestyle pyflakes
 script:
   - pyflakes .
-  - pycodestyle --disable E203 --max-line-length 88 .
+  - pycodestyle --ignore E203 --max-line-length 88 .
