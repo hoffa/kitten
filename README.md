@@ -15,7 +15,7 @@ pip install kitten
 Get IPs in Auto Scaling group:
 
 ```
-$ kitten aws asg my-asg-name
+$ kitten ip asg my-asg-name
 18.105.107.20
 34.229.135.48
 ```
@@ -23,7 +23,7 @@ $ kitten aws asg my-asg-name
 Run command on all instances in the Auto Scaling group:
 
 ```
-$ kitten aws asg my-asg-name | xargs kitten ssh uptime ubuntu
+$ kitten ip asg my-asg-name | xargs kitten run uptime ubuntu
 18.105.107.20 uptime
 34.229.135.48 uptime
 18.105.107.20 17:11:48 up 1 day,  6:02,  0 users,  load average: 0.91, 2.99, 3.49
@@ -34,5 +34,5 @@ Commands are always run in parallel. Use `xargs`'s `-L` to not overwhelm your ho
 
 Run command on 10 instances at a time:
 ```
-$ kitten aws asg big-prod-asg | xargs -L 10 kitten ssh --sudo 'service nginx restart' ubuntu
+$ kitten ip asg big-prod-asg | xargs -L 10 kitten run --sudo 'service nginx restart' ubuntu
 ```
