@@ -13,8 +13,22 @@ import fabric
 
 __version__ = "0.1.8"
 
-DEFAULT_TIMEOUT = 15
+TIMEOUT = 15
 CHUNK_SIZE = 100
+HELP = {
+    "command": "shell command to execute",
+    "hosts": "list of IP addresses",
+    "i": "private key path",
+    "kind": "AWS resource type",
+    "local": "path to local file",
+    "public": "print public IPs where possible",
+    "region": "AWS region",
+    "remote": "path to remote file",
+    "sudo": "run command via sudo",
+    "timeout": "connection timeout in seconds",
+    "user": "remote connection user",
+    "values": "list of instance IDs or resource names",
+}
 
 
 def yellow(s):
@@ -101,33 +115,39 @@ def parse_args():
     subparsers = parser.add_subparsers(dest="tool")
 
     aws_parser = subparsers.add_parser("ip")
-    aws_parser.add_argument("--region")
-    aws_parser.add_argument("--public", action="store_true")
-    aws_parser.add_argument("kind", choices=("id", "asg", "elb"))
-    aws_parser.add_argument("values", nargs="+")
+    aws_parser.add_argument("--region", help=HELP["region"])
+    aws_parser.add_argument("--public", action="store_true", help=HELP["public"])
+    aws_parser.add_argument("kind", choices=("id", "asg", "elb"), help=HELP["kind"])
+    aws_parser.add_argument("values", nargs="+", help=HELP["values"])
 
     ssh_parser = subparsers.add_parser("run")
-    ssh_parser.add_argument("-i")
-    ssh_parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT)
-    ssh_parser.add_argument("--sudo", action="store_true")
-    ssh_parser.add_argument("command")
-    ssh_parser.add_argument("user")
-    ssh_parser.add_argument("hosts", nargs="+")
+    ssh_parser.add_argument("-i", help=HELP["i"])
+    ssh_parser.add_argument(
+        "--timeout", type=int, default=TIMEOUT, help=HELP["timeout"]
+    )
+    ssh_parser.add_argument("--sudo", action="store_true", help=HELP["sudo"])
+    ssh_parser.add_argument("command", help=HELP["command"])
+    ssh_parser.add_argument("user", help=HELP["user"])
+    ssh_parser.add_argument("hosts", nargs="+", help=HELP["hosts"])
 
     get_parser = subparsers.add_parser("get")
-    get_parser.add_argument("-i")
-    get_parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT)
-    get_parser.add_argument("remote")
-    get_parser.add_argument("user")
-    get_parser.add_argument("hosts", nargs="+")
+    get_parser.add_argument("-i", help=HELP["i"])
+    get_parser.add_argument(
+        "--timeout", type=int, default=TIMEOUT, help=HELP["timeout"]
+    )
+    get_parser.add_argument("remote", help=HELP["remote"])
+    get_parser.add_argument("user", help=HELP["user"])
+    get_parser.add_argument("hosts", nargs="+", help=HELP["hosts"])
 
     put_parser = subparsers.add_parser("put")
-    put_parser.add_argument("-i")
-    put_parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT)
-    put_parser.add_argument("local")
-    put_parser.add_argument("remote")
-    put_parser.add_argument("user")
-    put_parser.add_argument("hosts", nargs="+")
+    put_parser.add_argument("-i", help=HELP["i"])
+    put_parser.add_argument(
+        "--timeout", type=int, default=TIMEOUT, help=HELP["timeout"]
+    )
+    put_parser.add_argument("local", help=HELP["local"])
+    put_parser.add_argument("remote", help=HELP["remote"])
+    put_parser.add_argument("user", help=HELP["user"])
+    put_parser.add_argument("hosts", nargs="+", help=HELP["hosts"])
 
     args = parser.parse_args()
     if not args.tool:
