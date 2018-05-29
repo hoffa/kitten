@@ -3,17 +3,20 @@
 from __future__ import unicode_literals
 
 import argparse
+import functools
 import io
 import os
 import sys
 import threading
+import queue
 
 import boto3
 import fabric
 
-__version__ = "0.1.9"
+__version__ = "0.1.10"
 
-TIMEOUT = 15
+DEFAULT_TIMEOUT = 15
+DEFAULT_THREADS = 10
 CHUNK_SIZE = 100
 HELP = {
     "command": "shell command to execute",
@@ -25,10 +28,21 @@ HELP = {
     "region": "AWS region",
     "remote": "path to remote file",
     "sudo": "run command via sudo",
+    "threads": "number of concurrent connections",
     "timeout": "connection timeout in seconds",
     "user": "remote connection user",
     "values": "list of instance IDs or resource names",
 }
+
+q = queue.Queue()
+
+
+def worker():
+    try:
+        while True:
+            q.get_nowait()()
+    except queue.Empty:
+        pass
 
 
 def red(s):
@@ -138,20 +152,26 @@ def parse_args():
     aws_parser.add_argument("kind", choices=("id", "asg", "elb"), help=HELP["kind"])
     aws_parser.add_argument("values", nargs="+", help=HELP["values"])
 
-    ssh_parser = subparsers.add_parser("run")
-    ssh_parser.add_argument("-i", help=HELP["i"])
-    ssh_parser.add_argument(
-        "--timeout", type=int, default=TIMEOUT, help=HELP["timeout"]
+    run_parser = subparsers.add_parser("run")
+    run_parser.add_argument("-i", help=HELP["i"])
+    run_parser.add_argument(
+        "--timeout", type=int, default=DEFAULT_TIMEOUT, help=HELP["timeout"]
     )
-    ssh_parser.add_argument("--sudo", action="store_true", help=HELP["sudo"])
-    ssh_parser.add_argument("command", help=HELP["command"])
-    ssh_parser.add_argument("user", help=HELP["user"])
-    ssh_parser.add_argument("hosts", nargs="+", help=HELP["hosts"])
+    run_parser.add_argument(
+        "--threads", type=int, default=DEFAULT_THREADS, help=HELP["threads"]
+    )
+    run_parser.add_argument("--sudo", action="store_true", help=HELP["sudo"])
+    run_parser.add_argument("command", help=HELP["command"])
+    run_parser.add_argument("user", help=HELP["user"])
+    run_parser.add_argument("hosts", nargs="+", help=HELP["hosts"])
 
     get_parser = subparsers.add_parser("get")
     get_parser.add_argument("-i", help=HELP["i"])
     get_parser.add_argument(
-        "--timeout", type=int, default=TIMEOUT, help=HELP["timeout"]
+        "--timeout", type=int, default=DEFAULT_TIMEOUT, help=HELP["timeout"]
+    )
+    get_parser.add_argument(
+        "--threads", type=int, default=DEFAULT_THREADS, help=HELP["threads"]
     )
     get_parser.add_argument("remote", help=HELP["remote"])
     get_parser.add_argument("user", help=HELP["user"])
@@ -160,7 +180,10 @@ def parse_args():
     put_parser = subparsers.add_parser("put")
     put_parser.add_argument("-i", help=HELP["i"])
     put_parser.add_argument(
-        "--timeout", type=int, default=TIMEOUT, help=HELP["timeout"]
+        "--timeout", type=int, default=DEFAULT_TIMEOUT, help=HELP["timeout"]
+    )
+    put_parser.add_argument(
+        "--threads", type=int, default=DEFAULT_THREADS, help=HELP["threads"]
     )
     put_parser.add_argument("local", help=HELP["local"])
     put_parser.add_argument("remote", help=HELP["remote"])
@@ -175,12 +198,22 @@ def parse_args():
     return args
 
 
-def start_threads(targets):
-    threads = [threading.Thread(target=target, args=args) for target, args in targets]
-    for thread in threads:
-        thread.start()
-    for thread in threads:
-        thread.join()
+def get_tasks(args):
+    cs = [
+        fabric.Connection(
+            host,
+            user=args.user,
+            connect_timeout=args.timeout,
+            connect_kwargs={"key_filename": args.i},
+        )
+        for host in args.hosts
+    ]
+    if args.tool == "run":
+        return [functools.partial(run, c, args.command, args.sudo) for c in cs]
+    elif args.tool == "get":
+        return [functools.partial(get, c, args.remote) for c in cs]
+    elif args.tool == "put":
+        return [functools.partial(put, c, args.local, args.remote) for c in cs]
 
 
 def main():
@@ -188,22 +221,13 @@ def main():
     if args.tool == "ip":
         ip(args.values, args.kind, args.public, args.region)
     else:
-        cs = [
-            fabric.Connection(
-                host,
-                user=args.user,
-                connect_timeout=args.timeout,
-                connect_kwargs={"key_filename": args.i},
-            )
-            for host in args.hosts
-        ]
-        if args.tool == "run":
-            targets = [(run, (c, args.command, args.sudo)) for c in cs]
-        elif args.tool == "get":
-            targets = [(get, (c, args.remote)) for c in cs]
-        elif args.tool == "put":
-            targets = [(put, (c, args.local, args.remote)) for c in cs]
-        start_threads(targets)
+        for task in get_tasks(args):
+            q.put_nowait(task)
+        for _ in range(args.threads):
+            thread = threading.Thread(target=worker)
+            thread.daemon = True
+            thread.start()
+        q.join()
 
 
 if __name__ == "__main__":
