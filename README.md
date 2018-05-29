@@ -10,7 +10,9 @@ Tiny tool to manage servers simultaneously. It aims to be as simple as possible.
 pip install kitten
 ```
 
-If you haven't yet, install `awscli` and configure AWS credentials:
+## Prerequisites
+
+Install `awscli` and configure AWS credentials:
 
 ```
 pip install awscli
