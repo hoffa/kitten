@@ -6,7 +6,7 @@ Tiny multi-server automation tool. Designed to be as simple as possible.
 
 ## Install
 
-```
+```Shell
 pip install kitten
 ```
 
@@ -14,7 +14,7 @@ pip install kitten
 
 You'll need to have your AWS credentials set up. You can do that using `awscli`:
 
-```
+```Shell
 pip install awscli
 aws configure
 ```
@@ -25,13 +25,13 @@ aws configure
 
 Use `kitten ip` with either `id`, `asg` or `elb`:
 
-```
+```Shell
 $ kitten ip id i-04703bf3e6fab1926 i-07f234d0f29113ef2
 18.135.117.17
 24.129.235.48
 ```
 
-```
+```Shell
 $ kitten ip asg my-asg-name
 18.105.107.20
 34.229.135.48
@@ -41,7 +41,7 @@ You can select the region using `--region`.
 
 ### Run command on servers
 
-```
+```Shell
 $ kitten run uptime ubuntu 18.105.107.20 34.229.135.48
 18.105.107.20 uptime
 34.229.135.48 uptime
@@ -61,18 +61,18 @@ Use `-i` to specify a private key.
 
 Just pipe the IPs from `kitten ip` to `xargs`:
 
-```
+```Shell
 $ kitten ip asg big-prod-asg-name | xargs kitten run 'rm -rf /tmp' root
 ```
 
 ### Download files
 
-```
+```Shell
 $ kitten ip elb big-prod-elb | xargs kitten get -i ~/.ssh/key.pem /tmp/system.log ubuntu
 ```
 
 ### Upload file
 
-```
+```Shell
 $ kitten ip elb big-prod-elb | xargs kitten put nginx.conf /etc/init/nginx.conf root
 ```
