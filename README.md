@@ -1,6 +1,6 @@
 # 😽 kitten
 
-[![Build Status](https://travis-ci.org/hoffa/kitten.svg?branch=master)](https://travis-ci.org/hoffa/kitten) [![Maintainability](https://api.codeclimate.com/v1/badges/34e6b84000b2ab0e1bce/maintainability)](https://codeclimate.com/github/hoffa/kitten/maintainability) [![PyPI - Python Version](https://img.shields.io/badge/python-2.7%2C%203.4%2C%203.5%2C%203.6-blue.svg)](https://pypi.org/project/kitten) [![PyPI - License](https://img.shields.io/badge/license-MIT-blue.svg)](https://pypi.org/project/kitten)
+[![Build Status](https://travis-ci.org/hoffa/kitten.svg?branch=master)](https://travis-ci.org/hoffa/kitten) [![Maintainability](https://api.codeclimate.com/v1/badges/34e6b84000b2ab0e1bce/maintainability)](https://codeclimate.com/github/hoffa/kitten/maintainability) [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/kitten.svg)](https://pypi.org/project/kitten) [![PyPI - License](https://img.shields.io/badge/license-MIT-blue.svg)](https://pypi.org/project/kitten)
 
 Tiny multi-server automation tool. It aims to be as simple as possible.
 
