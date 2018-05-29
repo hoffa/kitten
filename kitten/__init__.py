@@ -11,7 +11,7 @@ import threading
 
 import boto3
 import fabric
-from six.moves import queue
+from six.moves import queue, range
 
 __version__ = "0.1.13"
 
