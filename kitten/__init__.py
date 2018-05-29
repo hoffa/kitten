@@ -13,7 +13,7 @@ import boto3
 import fabric
 from six.moves import queue, range
 
-__version__ = "0.1.13"
+__version__ = "0.1.14"
 
 DEFAULT_TIMEOUT = 15
 DEFAULT_THREADS = 10
