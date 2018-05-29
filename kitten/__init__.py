@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from __future__ import unicode_literals
+from __future__ import absolute_import, print_function, unicode_literals
 
 import argparse
 import functools
@@ -10,14 +10,9 @@ import threading
 
 import boto3
 import fabric
+from six.moves import range, queue
 
-if sys.version_info.major > 2:
-    import queue
-else:
-    import Queue as queue
-
-
-__version__ = "0.1.19"
+__version__ = "0.1.20"
 
 CHUNK_SIZE = 100
 DEFAULT = {"timeout": 15, "threads": 10}
