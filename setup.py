@@ -5,10 +5,10 @@ with open("README.md") as f:
 
 setuptools.setup(
     name="kitten",
-    version="0.1.15",
+    version="0.1.16",
     author="Chris Rehn",
     author_email="chris@rehn.me",
-    description="Tiny tool to manage multiple servers.",
+    description="Tiny tool to manage servers simultaneously.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/hoffa/kitten",
