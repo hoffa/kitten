@@ -5,7 +5,7 @@ with open("README.md") as f:
 
 setuptools.setup(
     name="kitten",
-    version="0.1.10",
+    version="0.1.11",
     author="Chris Rehn",
     author_email="chris@rehn.me",
     description="Tiny tool to manage multiple servers.",
@@ -14,7 +14,7 @@ setuptools.setup(
     url="https://github.com/hoffa/kitten",
     packages=setuptools.find_packages(),
     entry_points={"console_scripts": {"kitten=kitten:main"}},
-    install_requires=["boto3", "fabric>=2.0"],
+    install_requires=["boto3", "fabric>=2.0", "six"],
     license="MIT",
     classifiers=(
         "Development Status :: 4 - Beta",

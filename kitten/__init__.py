@@ -8,12 +8,12 @@ import io
 import os
 import sys
 import threading
-import queue
 
 import boto3
 import fabric
+from six.moves import queue
 
-__version__ = "0.1.10"
+__version__ = "0.1.11"
 
 DEFAULT_TIMEOUT = 15
 DEFAULT_THREADS = 10
