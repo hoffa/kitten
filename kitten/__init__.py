@@ -218,6 +218,13 @@ def get_tasks(args):
         return [functools.partial(put, conn, args.local, args.remote) for conn in conns]
 
 
+def start_workers(n):
+    for _ in range(n):
+        thread = threading.Thread(target=worker)
+        thread.daemon = True
+        thread.start()
+
+
 def main():
     args = parse_args()
     if args.tool == "ip":
@@ -225,16 +232,13 @@ def main():
     else:
         for task in get_tasks(args):
             tasks.put_nowait(task)
-        workers = min(args.threads, len(args.hosts))
+        n = min(args.threads, len(args.hosts))
         print(
             "perform {} on {} hosts using {} threads".format(
-                args.tool, len(args.hosts), workers
+                args.tool, len(args.hosts), n
             )
         )
-        for _ in range(workers):
-            thread = threading.Thread(target=worker)
-            thread.daemon = True
-            thread.start()
+        start_workers(n)
         tasks.join()
 
 
