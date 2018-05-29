@@ -2,16 +2,16 @@
 
 from __future__ import unicode_literals
 
-if sys.version_info.major > 2:
-    import queue
-else:
-    import Queue as queue
-
 import argparse
 import functools
 import os
 import sys
 import threading
+
+if sys.version_info.major > 2:
+    import queue
+else:
+    import Queue as queue
 
 import boto3
 import fabric

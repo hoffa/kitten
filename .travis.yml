@@ -6,6 +6,7 @@ python:
   - "3.6"
 install:
   - python setup.py check --metadata --strict
+  - python setup.py pytest
   - pip install pycodestyle pyflakes
 script:
   - pyflakes .
