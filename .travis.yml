@@ -11,4 +11,4 @@ script:
   - pyflakes .
   - pycodestyle --ignore E203 --max-line-length 88 .
   - python setup.py check --metadata --strict
-  - python setup.py pytest --verbose
+  - python setup.py pytest
