@@ -37,11 +37,11 @@ $ kitten ip asg my-asg-name | xargs kitten run uptime ubuntu
 34.229.135.48 17:11:48 up 5 days, 11:19,  0 users,  load average: 6.34, 5.94, 5.72
 ```
 
-Commands are always run in parallel. Use `xargs`'s `-L` to not overwhelm your host.
+Commands are always run in parallel. Use `--threads` to specify the maximum number of concurrent connections (defaults to 10).
 
-Run command on 10 instances at a time:
+Run command on instances using 50 connections:
 ```
-$ kitten ip asg big-prod-asg | xargs -L 10 kitten run --sudo 'service nginx restart' ubuntu
+$ kitten ip asg big-prod-asg | xargs kitten run --threads 50 --sudo 'service nginx restart' ubuntu
 ```
 
 Download file:
