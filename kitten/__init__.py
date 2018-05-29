@@ -8,13 +8,14 @@ import os
 import sys
 import threading
 
+import boto3
+import fabric
+
 if sys.version_info.major > 2:
     import queue
 else:
     import Queue as queue
 
-import boto3
-import fabric
 
 __version__ = "0.1.18"
 
