@@ -34,14 +34,15 @@ HELP = {
     "values": "list of instance IDs or resource names",
 }
 
-q = queue.Queue()
+tasks = queue.Queue()
 
 
 def worker():
     try:
         while True:
-            q.get_nowait()()
-            q.task_done()
+            task = tasks.get_nowait()
+            task()
+            tasks.task_done()
     except queue.Empty:
         pass
 
@@ -105,41 +106,41 @@ def ip(values, kind, public, region_name):
     print_ips(ec2, instance_ids, public, region_name)
 
 
-def run(c, command, sudo):
-    print("{} run {}".format(yellow(c.host), yellow(command)))
+def run(conn, command, sudo):
+    print("{} run {}".format(yellow(conn.host), yellow(command)))
     f = io.StringIO()
-    func = c.sudo if sudo else c.run
-    func(command, out_stream=f, err_stream=f)
+    with conn as c:
+        func = c.sudo if sudo else c.run
+        func(command, out_stream=f, err_stream=f)
     for line in f.getvalue().splitlines():
-        print(yellow(c.host) + " " + line)
-    c.close()
+        print(yellow(conn.host) + " " + line)
 
 
-def put(c, local, remote):
-    print("{} put {} to {}".format(yellow(c.host), yellow(local), yellow(remote)))
+def put(conn, local, remote):
+    print("{} put {} to {}".format(yellow(conn.host), yellow(local), yellow(remote)))
     try:
-        c.put(local, remote=remote)
+        with conn as c:
+            c.put(local, remote=remote)
     except Exception as e:
-        print(yellow(c.host) + " " + red(str(e)))
+        print(yellow(conn.host) + " " + red(str(e)))
     else:
-        print(yellow(c.host) + " " + green("ok"))
-    c.close()
+        print(yellow(conn.host) + " " + green("ok"))
 
 
-def get(c, remote):
+def get(conn, remote):
     try:
-        os.mkdir(c.host)
+        os.mkdir(conn.host)
     except OSError:
         pass
-    local = c.host + "/" + os.path.basename(remote)
-    print("{} get {} to {}".format(yellow(c.host), yellow(remote), yellow(local)))
+    local = conn.host + "/" + os.path.basename(remote)
+    print("{} get {} to {}".format(yellow(conn.host), yellow(remote), yellow(local)))
     try:
-        c.get(remote, local=local)
+        with conn as c:
+            c.get(remote, local=local)
     except Exception as e:
-        print(yellow(c.host) + " " + red(str(e)))
+        print(yellow(conn.host) + " " + red(str(e)))
     else:
-        print(yellow(c.host) + " " + green("ok"))
-    c.close()
+        print(yellow(conn.host) + " " + green("ok"))
 
 
 def parse_args():
@@ -200,7 +201,7 @@ def parse_args():
 
 
 def get_tasks(args):
-    cs = [
+    conns = [
         fabric.Connection(
             host,
             user=args.user,
@@ -210,11 +211,11 @@ def get_tasks(args):
         for host in args.hosts
     ]
     if args.tool == "run":
-        return [functools.partial(run, c, args.command, args.sudo) for c in cs]
+        return [functools.partial(run, conn, args.command, args.sudo) for conn in conns]
     elif args.tool == "get":
-        return [functools.partial(get, c, args.remote) for c in cs]
+        return [functools.partial(get, conn, args.remote) for conn in conns]
     elif args.tool == "put":
-        return [functools.partial(put, c, args.local, args.remote) for c in cs]
+        return [functools.partial(put, conn, args.local, args.remote) for conn in conns]
 
 
 def main():
@@ -223,7 +224,7 @@ def main():
         ip(args.values, args.kind, args.public, args.region)
     else:
         for task in get_tasks(args):
-            q.put_nowait(task)
+            tasks.put_nowait(task)
         workers = min(args.threads, len(args.hosts))
         print(
             "perform {} on {} hosts using {} threads".format(
@@ -234,7 +235,7 @@ def main():
             thread = threading.Thread(target=worker)
             thread.daemon = True
             thread.start()
-        q.join()
+        tasks.join()
 
 
 if __name__ == "__main__":
