@@ -14,7 +14,7 @@ setuptools.setup(
     url="https://github.com/hoffa/kitten",
     packages=setuptools.find_packages(),
     entry_points={"console_scripts": {"kitten=kitten:main"}},
-    install_requires=["boto3", "fabric>=2.0", "six"],
+    install_requires=["boto3>=1.0", "fabric>=2.0", "six>=1.0"],
     license="MIT",
     classifiers=(
         "Development Status :: 4 - Beta",
