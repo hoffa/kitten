@@ -114,13 +114,13 @@ def run(conn, command, sudo):
 
 def put(conn, local, remote):
     print("{} put {} to {}".format(yellow(conn.host), yellow(local), yellow(remote)))
+    result = "ok"
     try:
         with conn as c:
             c.put(local, remote=remote)
     except Exception as e:
-        print(yellow(conn.host) + " " + red(str(e)))
-    else:
-        print(yellow(conn.host) + " " + "ok")
+        result = red(str(e))
+    print(yellow(conn.host) + " " + result)
 
 
 def get(conn, remote):
@@ -130,13 +130,13 @@ def get(conn, remote):
         pass
     local = conn.host + "/" + os.path.basename(remote)
     print("{} get {} to {}".format(yellow(conn.host), yellow(remote), yellow(local)))
+    result = "ok"
     try:
         with conn as c:
             c.get(remote, local=local)
     except Exception as e:
-        print(yellow(conn.host) + " " + red(str(e)))
-    else:
-        print(yellow(conn.host) + " " + "ok")
+        result = red(str(e))
+    print(yellow(conn.host) + " " + result)
 
 
 def parse_args():
