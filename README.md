@@ -21,7 +21,7 @@ aws configure
 
 ## Examples
 
-#### Get IPs from AWS resources
+### Get IPs from AWS resources
 
 Use `kitten ip` with either `id`, `asg` or `elb`:
 
@@ -39,7 +39,7 @@ $ kitten ip asg my-asg-name
 
 You can select the region using `--region`.
 
-#### Run command on servers
+### Run command on servers
 
 ```
 $ kitten run uptime ubuntu 18.105.107.20 34.229.135.48
@@ -57,7 +57,7 @@ Use `--sudo` to run commands via `sudo`.
 
 Use `-i` to specify a private key.
 
-#### Get IPs and run command in one step
+### Get IPs and run command in one step
 
 Just pipe the IPs from `kitten ip` to `xargs`:
 
@@ -65,13 +65,13 @@ Just pipe the IPs from `kitten ip` to `xargs`:
 $ kitten ip asg big-prod-asg-name | xargs kitten run 'rm -rf /tmp' root
 ```
 
-#### Download files
+### Download files
 
 ```
 $ kitten ip elb big-prod-elb | xargs kitten get -i ~/.ssh/key.pem /tmp/system.log ubuntu
 ```
 
-#### Upload file
+### Upload file
 
 ```
 $ kitten ip elb big-prod-elb | xargs kitten put nginx.conf /etc/init/nginx.conf root
