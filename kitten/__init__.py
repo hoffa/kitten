@@ -12,11 +12,10 @@ import boto3
 import fabric
 from six.moves import queue, range
 
-__version__ = "0.1.16"
+__version__ = "0.1.17"
 
-DEFAULT_TIMEOUT = 15
-DEFAULT_THREADS = 10
 CHUNK_SIZE = 100
+DEFAULT = {"timeout": 15, "threads": 10}
 HELP = {
     "command": "shell command to execute",
     "hosts": "list of IP addresses",
@@ -36,16 +35,6 @@ HELP = {
 tasks = queue.Queue()
 
 
-def worker():
-    try:
-        while True:
-            task = tasks.get_nowait()
-            task()
-            tasks.task_done()
-    except queue.Empty:
-        pass
-
-
 def red(s):
     return "\033[31m" + s + "\033[0m"
 
@@ -59,9 +48,9 @@ def chunks(l, n):
         yield l[i : i + n]
 
 
-def instance_ids_to_ips(client, instance_ids):
+def instance_ids_to_ips(resource, instance_ids):
     filters = [{"Name": "instance-id", "Values": instance_ids}]
-    for instance in client.instances.filter(Filters=filters):
+    for instance in resource.instances.filter(Filters=filters):
         yield {
             "public": instance.public_ip_address,
             "private": instance.private_ip_address,
@@ -139,61 +128,21 @@ def get(conn, remote):
     print(yellow(conn.host) + " " + result)
 
 
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--version", action="version", version=__version__)
-    subparsers = parser.add_subparsers(dest="tool")
+def worker():
+    try:
+        while True:
+            task = tasks.get_nowait()
+            task()
+            tasks.task_done()
+    except queue.Empty:
+        pass
 
-    aws_parser = subparsers.add_parser("ip")
-    aws_parser.add_argument("--region", help=HELP["region"])
-    aws_parser.add_argument("--public", action="store_true", help=HELP["public"])
-    aws_parser.add_argument("kind", choices=("id", "asg", "elb"), help=HELP["kind"])
-    aws_parser.add_argument("values", nargs="+", help=HELP["values"])
 
-    run_parser = subparsers.add_parser("run")
-    run_parser.add_argument("-i", help=HELP["i"])
-    run_parser.add_argument(
-        "--timeout", type=int, default=DEFAULT_TIMEOUT, help=HELP["timeout"]
-    )
-    run_parser.add_argument(
-        "--threads", type=int, default=DEFAULT_THREADS, help=HELP["threads"]
-    )
-    run_parser.add_argument("--sudo", action="store_true", help=HELP["sudo"])
-    run_parser.add_argument("command", help=HELP["command"])
-    run_parser.add_argument("user", help=HELP["user"])
-    run_parser.add_argument("hosts", nargs="+", help=HELP["hosts"])
-
-    get_parser = subparsers.add_parser("get")
-    get_parser.add_argument("-i", help=HELP["i"])
-    get_parser.add_argument(
-        "--timeout", type=int, default=DEFAULT_TIMEOUT, help=HELP["timeout"]
-    )
-    get_parser.add_argument(
-        "--threads", type=int, default=DEFAULT_THREADS, help=HELP["threads"]
-    )
-    get_parser.add_argument("remote", help=HELP["remote"])
-    get_parser.add_argument("user", help=HELP["user"])
-    get_parser.add_argument("hosts", nargs="+", help=HELP["hosts"])
-
-    put_parser = subparsers.add_parser("put")
-    put_parser.add_argument("-i", help=HELP["i"])
-    put_parser.add_argument(
-        "--timeout", type=int, default=DEFAULT_TIMEOUT, help=HELP["timeout"]
-    )
-    put_parser.add_argument(
-        "--threads", type=int, default=DEFAULT_THREADS, help=HELP["threads"]
-    )
-    put_parser.add_argument("local", help=HELP["local"])
-    put_parser.add_argument("remote", help=HELP["remote"])
-    put_parser.add_argument("user", help=HELP["user"])
-    put_parser.add_argument("hosts", nargs="+", help=HELP["hosts"])
-
-    args = parser.parse_args()
-    if not args.tool:
-        parser.print_help()
-        sys.exit(2)
-
-    return args
+def start_workers(num_workers):
+    for _ in range(num_workers):
+        thread = threading.Thread(target=worker)
+        thread.daemon = True
+        thread.start()
 
 
 def get_tasks(args):
@@ -214,11 +163,61 @@ def get_tasks(args):
         return [functools.partial(put, conn, args.local, args.remote) for conn in conns]
 
 
-def start_workers(n):
-    for _ in range(n):
-        thread = threading.Thread(target=worker)
-        thread.daemon = True
-        thread.start()
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--version", action="version", version=__version__)
+    subparsers = parser.add_subparsers(dest="tool")
+
+    aws_parser = subparsers.add_parser("ip")
+    aws_parser.add_argument("--region", help=HELP["region"])
+    aws_parser.add_argument("--public", action="store_true", help=HELP["public"])
+    aws_parser.add_argument("kind", choices=("id", "asg", "elb"), help=HELP["kind"])
+    aws_parser.add_argument("values", nargs="+", help=HELP["values"])
+
+    run_parser = subparsers.add_parser("run")
+    run_parser.add_argument("-i", help=HELP["i"])
+    run_parser.add_argument(
+        "--timeout", type=int, default=DEFAULT["timeout"], help=HELP["timeout"]
+    )
+    run_parser.add_argument(
+        "--threads", type=int, default=DEFAULT["threads"], help=HELP["threads"]
+    )
+    run_parser.add_argument("--sudo", action="store_true", help=HELP["sudo"])
+    run_parser.add_argument("command", help=HELP["command"])
+    run_parser.add_argument("user", help=HELP["user"])
+    run_parser.add_argument("hosts", nargs="+", help=HELP["hosts"])
+
+    get_parser = subparsers.add_parser("get")
+    get_parser.add_argument("-i", help=HELP["i"])
+    get_parser.add_argument(
+        "--timeout", type=int, default=DEFAULT["timeout"], help=HELP["timeout"]
+    )
+    get_parser.add_argument(
+        "--threads", type=int, default=DEFAULT["threads"], help=HELP["threads"]
+    )
+    get_parser.add_argument("remote", help=HELP["remote"])
+    get_parser.add_argument("user", help=HELP["user"])
+    get_parser.add_argument("hosts", nargs="+", help=HELP["hosts"])
+
+    put_parser = subparsers.add_parser("put")
+    put_parser.add_argument("-i", help=HELP["i"])
+    put_parser.add_argument(
+        "--timeout", type=int, default=DEFAULT["timeout"], help=HELP["timeout"]
+    )
+    put_parser.add_argument(
+        "--threads", type=int, default=DEFAULT["threads"], help=HELP["threads"]
+    )
+    put_parser.add_argument("local", help=HELP["local"])
+    put_parser.add_argument("remote", help=HELP["remote"])
+    put_parser.add_argument("user", help=HELP["user"])
+    put_parser.add_argument("hosts", nargs="+", help=HELP["hosts"])
+
+    args = parser.parse_args()
+    if not args.tool:
+        parser.print_help()
+        sys.exit(2)
+
+    return args
 
 
 def main():
@@ -228,8 +227,8 @@ def main():
     else:
         for task in get_tasks(args):
             tasks.put_nowait(task)
-        n = min(args.threads, len(args.hosts))
-        start_workers(n)
+        num_workers = min(args.threads, len(args.hosts))
+        start_workers(num_workers)
         tasks.join()
 
 

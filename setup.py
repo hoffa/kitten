@@ -5,7 +5,7 @@ with open("README.md") as f:
 
 setuptools.setup(
     name="kitten",
-    version="0.1.16",
+    version="0.1.17",
     author="Chris Rehn",
     author_email="chris@rehn.me",
     description="Tiny tool to manage servers simultaneously.",
@@ -18,6 +18,7 @@ setuptools.setup(
     license="MIT",
     classifiers=(
         "Development Status :: 4 - Beta",
+        "Environment :: Console",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 2",
@@ -26,5 +27,11 @@ setuptools.setup(
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Topic :: System :: Installation/Setup",
+        "Topic :: System :: Monitoring",
+        "Topic :: System :: Shells",
+        "Topic :: System :: Systems Administration",
+        "Topic :: Utilities",
     ),
 )
