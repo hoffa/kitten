@@ -144,7 +144,9 @@ def get(conn, remote):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description="Tiny tool to manage servers simultaneously."
+    )
     parser.add_argument("--version", action="version", version=__version__)
     subparsers = parser.add_subparsers(dest="tool")
 
