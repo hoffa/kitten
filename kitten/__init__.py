@@ -17,7 +17,7 @@ else:
     import Queue as queue
 
 
-__version__ = "0.1.18"
+__version__ = "0.1.19"
 
 CHUNK_SIZE = 100
 DEFAULT = {"timeout": 15, "threads": 10}
