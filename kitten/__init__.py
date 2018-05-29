@@ -2,6 +2,11 @@
 
 from __future__ import unicode_literals
 
+if sys.version_info.major > 2:
+    import queue
+else:
+    import Queue as queue
+
 import argparse
 import functools
 import os
@@ -10,9 +15,8 @@ import threading
 
 import boto3
 import fabric
-from six.moves import queue, range
 
-__version__ = "0.1.17"
+__version__ = "0.1.18"
 
 CHUNK_SIZE = 100
 DEFAULT = {"timeout": 15, "threads": 10}
@@ -164,9 +168,7 @@ def get_tasks(args):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(
-        description="Tiny multi-server automation tool."
-    )
+    parser = argparse.ArgumentParser(description="Tiny multi-server automation tool.")
     parser.add_argument("--version", action="version", version=__version__)
     subparsers = parser.add_subparsers(dest="tool")
 
