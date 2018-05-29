@@ -62,17 +62,17 @@ Use `-i` to specify a private key.
 Just pipe the IPs from `kitten ip` to `xargs`:
 
 ```Shell
-$ kitten ip asg big-prod-asg-name | xargs kitten run 'rm -rf /tmp' root
+kitten ip asg big-prod-asg-name | xargs kitten run 'rm -rf /tmp' root
 ```
 
 ### Download files
 
 ```Shell
-$ kitten ip elb big-prod-elb | xargs kitten get -i ~/.ssh/key.pem /tmp/system.log ubuntu
+kitten ip elb big-prod-elb | xargs kitten get -i ~/.ssh/key.pem /tmp/system.log ubuntu
 ```
 
 ### Upload file
 
 ```Shell
-$ kitten ip elb big-prod-elb | xargs kitten put nginx.conf /etc/init/nginx.conf root
+kitten ip elb big-prod-elb | xargs kitten put nginx.conf /etc/init/nginx.conf root
 ```
