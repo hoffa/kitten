@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 import argparse
 import functools
-import io
 import os
 import sys
 import threading
@@ -49,10 +48,6 @@ def worker():
 
 def red(s):
     return "\033[31m" + s + "\033[0m"
-
-
-def green(s):
-    return "\033[32m" + s + "\033[0m"
 
 
 def yellow(s):
@@ -108,14 +103,12 @@ def ip(values, kind, public, region_name):
 
 def run(conn, command, sudo):
     print("{} run {}".format(yellow(conn.host), yellow(command)))
-    out = io.StringIO()
-    try:
-        with conn as c:
-            func = c.sudo if sudo else c.run
-            func(command, pty=True, out_stream=out)
-    except Exception as e:
-        print(yellow(conn.host) + " " + red(str(e)))
-    for line in out.getvalue().splitlines():
+    with conn as c:
+        func = c.sudo if sudo else c.run
+        result = func(command, pty=True, hide=True, warn=True)
+    for line in result.stdout.splitlines():
+        if result.failed:
+            line = red(line)
         print(yellow(conn.host) + " " + line)
 
 
@@ -127,7 +120,7 @@ def put(conn, local, remote):
     except Exception as e:
         print(yellow(conn.host) + " " + red(str(e)))
     else:
-        print(yellow(conn.host) + " " + green("ok"))
+        print(yellow(conn.host) + " " + "ok")
 
 
 def get(conn, remote):
@@ -143,7 +136,7 @@ def get(conn, remote):
     except Exception as e:
         print(yellow(conn.host) + " " + red(str(e)))
     else:
-        print(yellow(conn.host) + " " + green("ok"))
+        print(yellow(conn.host) + " " + "ok")
 
 
 def parse_args():
@@ -236,11 +229,6 @@ def main():
         for task in get_tasks(args):
             tasks.put_nowait(task)
         n = min(args.threads, len(args.hosts))
-        print(
-            "perform {} on {} hosts using {} threads".format(
-                args.tool, len(args.hosts), n
-            )
-        )
         start_workers(n)
         tasks.join()
 
