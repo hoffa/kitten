@@ -223,6 +223,11 @@ def main():
     else:
         for task in get_tasks(args):
             q.put_nowait(task)
+        print(
+            "perform {} on {} hosts using {} threads".format(
+                args.tool, len(args.hosts), args.threads
+            )
+        )
         for _ in range(args.threads):
             thread = threading.Thread(target=worker)
             thread.daemon = True
