@@ -13,7 +13,7 @@ import boto3
 import fabric
 from six.moves import queue, range
 
-__version__ = "0.1.14"
+__version__ = "0.1.15"
 
 DEFAULT_TIMEOUT = 15
 DEFAULT_THREADS = 10
@@ -109,9 +109,12 @@ def ip(values, kind, public, region_name):
 def run(conn, command, sudo):
     print("{} run {}".format(yellow(conn.host), yellow(command)))
     f = io.StringIO()
-    with conn as c:
-        func = c.sudo if sudo else c.run
-        func(command, out_stream=f, err_stream=f)
+    try:
+        with conn as c:
+            func = c.sudo if sudo else c.run
+            func(command, out_stream=f, err_stream=f)
+    except Exception as e:
+        print(yellow(conn.host) + " " + red(str(e)))
     for line in f.getvalue().splitlines():
         print(yellow(conn.host) + " " + line)
 
