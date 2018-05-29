@@ -16,6 +16,11 @@ You'll need to have your AWS credentials set up. You can do that using `awscli`:
 
 ```Shell
 pip install awscli
+```
+
+Then:
+
+```Shell
 aws configure
 ```
 
@@ -37,7 +42,7 @@ $ kitten ip asg my-asg-name
 34.229.135.48
 ```
 
-You can select the region using `--region`.
+You can change region using `--region`.
 
 ### Run command on servers
 
