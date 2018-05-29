@@ -1,8 +1,8 @@
 # 😽 kitten
 
-[![Build Status](https://travis-ci.org/hoffa/kitten.svg?branch=master)](https://travis-ci.org/hoffa/kitten) [![Maintainability](https://api.codeclimate.com/v1/badges/34e6b84000b2ab0e1bce/maintainability)](https://codeclimate.com/github/hoffa/kitten/maintainability) [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/kitten.svg)](https://pypi.org/project/kitten) [![PyPI](https://img.shields.io/pypi/v/kitten.svg)](https://pypi.python.org/pypi/kitten) [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fhoffa%2Fdamn.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fhoffa%2Fdamn?ref=badge_shield)
+[![Build Status](https://travis-ci.org/hoffa/kitten.svg?branch=master)](https://travis-ci.org/hoffa/kitten) [![Maintainability](https://api.codeclimate.com/v1/badges/34e6b84000b2ab0e1bce/maintainability)](https://codeclimate.com/github/hoffa/kitten/maintainability) [![PyPI - Python Version](https://img.shields.io/badge/python-2.7%2C%203.4%2C%203.5%2C%203.6-blue.svg)](https://pypi.org/project/kitten) [![PyPI - License](https://img.shields.io/badge/license-MIT-blue.svg)](https://pypi.org/project/kitten)
 
-Tiny tool to manage multiple servers.
+Tiny tool to manage servers simultaneously. It aims to be as simple as possible.
 
 ## Install
 
@@ -10,7 +10,9 @@ Tiny tool to manage multiple servers.
 pip install kitten
 ```
 
-If you haven't yet, install `awscli` and configure AWS credentials:
+## Prerequisites
+
+You'll need to have AWS credentials set up. You can do it using `awscli`:
 
 ```
 pip install awscli
@@ -19,7 +21,15 @@ aws configure
 
 ## Examples
 
-Get IPs in Auto Scaling group:
+### Get IPs from AWS resources
+
+Use `kitten ip` with either `id`, `asg` or `elb`:
+
+```
+$ kitten ip id i-04703bf3e6fab1926 i-07f234d0f29113ef2
+18.135.117.17
+24.129.235.48
+```
 
 ```
 $ kitten ip asg my-asg-name
@@ -27,29 +37,42 @@ $ kitten ip asg my-asg-name
 34.229.135.48
 ```
 
-Run command on all instances in the Auto Scaling group:
+You can select the region using `--region`.
+
+### Run command on servers
 
 ```
-$ kitten ip asg my-asg-name | xargs kitten run uptime ubuntu
+$ kitten run uptime ubuntu 18.105.107.20 34.229.135.48
 18.105.107.20 uptime
 34.229.135.48 uptime
 18.105.107.20 17:11:48 up 1 day,  6:02,  0 users,  load average: 0.91, 2.99, 3.49
 34.229.135.48 17:11:48 up 5 days, 11:19,  0 users,  load average: 6.34, 5.94, 5.72
 ```
 
+Replace `ubuntu` with the user used to log in on the servers.
+
 Commands are always run in parallel. Use `--threads` to specify the maximum number of concurrent connections (defaults to 10).
 
-Run command on instances using 50 connections:
+Use `--sudo` to run commands via `sudo`.
+
+Use `-i` to specify a private key.
+
+### Get IPs and run command in one step
+
+Just pipe the IPs from `kitten ip` to `xargs`:
+
 ```
-$ kitten ip asg big-prod-asg | xargs kitten run --threads 50 --sudo 'service nginx restart' ubuntu
+$ kitten ip asg big-prod-asg-name | xargs kitten run 'rm -rf /tmp' root
 ```
 
-Download file:
+### Download files
+
 ```
-$ kitten ip elb big-prod-elb | xargs kitten get /var/log/system.log ubuntu
+$ kitten ip elb big-prod-elb | xargs kitten get -i ~/.ssh/key.pem /tmp/system.log ubuntu
 ```
 
-Upload file:
+### Upload file
+
 ```
-$ kitten ip elb big-prod-elb | xargs kitten put nginx.conf /etc/init/nginx.conf ubuntu
+$ kitten ip elb big-prod-elb | xargs kitten put nginx.conf /etc/init/nginx.conf root
 ```
