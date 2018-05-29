@@ -8,7 +8,7 @@ setuptools.setup(
     version="0.1.17",
     author="Chris Rehn",
     author_email="chris@rehn.me",
-    description="Tiny tool to manage servers simultaneously.",
+    description="Tiny multi-server automation tool.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/hoffa/kitten",

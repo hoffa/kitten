@@ -165,7 +165,7 @@ def get_tasks(args):
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Tiny tool to manage servers simultaneously."
+        description="Tiny multi-server automation tool."
     )
     parser.add_argument("--version", action="version", version=__version__)
     subparsers = parser.add_subparsers(dest="tool")
