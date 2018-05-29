@@ -13,7 +13,7 @@ import boto3
 import fabric
 from six.moves import queue
 
-__version__ = "0.1.11"
+__version__ = "0.1.12"
 
 DEFAULT_TIMEOUT = 15
 DEFAULT_THREADS = 10
@@ -41,6 +41,7 @@ def worker():
     try:
         while True:
             q.get_nowait()()
+            q.task_done()
     except queue.Empty:
         pass
 
@@ -223,12 +224,13 @@ def main():
     else:
         for task in get_tasks(args):
             q.put_nowait(task)
+        workers = min(args.threads, len(args.hosts))
         print(
             "perform {} on {} hosts using {} threads".format(
-                args.tool, len(args.hosts), args.threads
+                args.tool, len(args.hosts), workers
             )
         )
-        for _ in range(args.threads):
+        for _ in range(workers):
             thread = threading.Thread(target=worker)
             thread.daemon = True
             thread.start()
