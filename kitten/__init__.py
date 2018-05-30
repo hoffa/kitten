@@ -13,11 +13,11 @@ import boto3
 import fabric
 from six.moves import range, queue
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
-log.addHandler(logging.StreamHandler())
+log.addHandler(logging.StreamHandler(sys.stdout))
 
 CHUNK_SIZE = 100
 DEFAULT = {"threads": 10, "timeout": 15}
