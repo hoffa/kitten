@@ -79,5 +79,5 @@ kitten ip elb big-prod-elb | xargs kitten get -i ~/.ssh/key.pem /tmp/system.log 
 ### Upload file
 
 ```Shell
-kitten ip --region ap-northeast-2 elb big-prod-elb | xargs kitten put nginx.conf /etc/init/nginx.conf root
+kitten ip --region ap-northeast-2 elb big-prod-elb | xargs kitten put cat.jpg /root/cat.jpg root
 ```
