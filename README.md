@@ -26,7 +26,7 @@ aws configure
 
 ## Examples
 
-### Get IPs from AWS resources
+### Get IP addresses from AWS resources
 
 Use `kitten ip` with either `id`, `asg` or `elb`:
 
@@ -62,7 +62,7 @@ Use `--sudo` to run commands via `sudo`.
 
 Use `-i` to specify a private key.
 
-### Get IPs and run command in one step
+### Get IP addresses and run command in one step
 
 Just pipe the IPs from `kitten ip` to [`xargs`](http://man7.org/linux/man-pages/man1/xargs.1.html):
 
