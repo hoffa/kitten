@@ -4,10 +4,9 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import argparse
 import functools
+import logging
 import os
-import signal
 import sys
-import time
 import threading
 
 import boto3
@@ -33,6 +32,10 @@ HELP = {
     "user": "remote connection user",
     "values": "list of instance IDs or resource names",
 }
+
+log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
+log.addHandler(logging.StreamHandler())
 
 tasks = queue.Queue()
 stop = threading.Event()
@@ -77,7 +80,7 @@ def elbs_to_instance_ids(client, elb_names):
 def print_ips(client, instance_ids, public, region_name):
     for chunk in chunks(list(instance_ids), CHUNK_SIZE):
         for ip in instance_ids_to_ips(client, chunk):
-            print(public and ip["public"] or ip["private"])
+            log.info(public and ip["public"] or ip["private"])
 
 
 def ip(values, kind, public, region_name):
@@ -94,25 +97,25 @@ def ip(values, kind, public, region_name):
 
 
 def run(conn, command, sudo):
-    print("{} run {}".format(yellow(conn.host), yellow(command)))
+    log.info("{} run {}".format(yellow(conn.host), yellow(command)))
     with conn as c:
         func = c.sudo if sudo else c.run
-        result = func(command, pty=True, hide=True, warn=True)
+        result = func(command, pty=True, hide=True, warn=True, in_stream=False)
     for line in result.stdout.splitlines():
         if result.failed:
             line = red(line)
-        print(yellow(conn.host) + " " + line)
+        log.info(yellow(conn.host) + " " + line)
 
 
 def put(conn, local, remote):
-    print("{} put {} to {}".format(yellow(conn.host), yellow(local), yellow(remote)))
+    log.info("{} put {} to {}".format(yellow(conn.host), yellow(local), yellow(remote)))
     result = "ok"
     try:
         with conn as c:
             c.put(local, remote=remote)
     except Exception as e:
         result = red(str(e))
-    print(yellow(conn.host) + " " + result)
+    log.info(yellow(conn.host) + " " + result)
 
 
 def get(conn, remote):
@@ -121,24 +124,14 @@ def get(conn, remote):
     except OSError:
         pass
     local = conn.host + "/" + os.path.basename(remote)
-    print("{} get {} to {}".format(yellow(conn.host), yellow(remote), yellow(local)))
+    log.info("{} get {} to {}".format(yellow(conn.host), yellow(remote), yellow(local)))
     result = "ok"
     try:
         with conn as c:
             c.get(remote, local=local)
     except Exception as e:
         result = red(str(e))
-    print(yellow(conn.host) + " " + result)
-
-
-def worker():
-    while not stop.is_set():
-        try:
-            task = tasks.get_nowait()
-            task()
-            tasks.task_done()
-        except queue.Empty:
-            break
+    log.info(yellow(conn.host) + " " + result)
 
 
 def get_tasks(args):
@@ -157,6 +150,27 @@ def get_tasks(args):
         return [functools.partial(get, conn, args.remote) for conn in conns]
     elif args.tool == "put":
         return [functools.partial(put, conn, args.local, args.remote) for conn in conns]
+
+
+def worker():
+    while not stop.is_set():
+        try:
+            task = tasks.get_nowait()
+            task()
+            tasks.task_done()
+        except queue.Empty:
+            break
+
+
+def start_workers(num_workers):
+    threads = []
+    for _ in range(num_workers):
+        thread = threading.Thread(target=worker)
+        thread.start()
+        threads.append(thread)
+    for thread in threads:
+        while thread.is_alive():
+            thread.join(1)
 
 
 def parse_args():
@@ -223,17 +237,11 @@ def main():
     else:
         for task in get_tasks(args):
             tasks.put_nowait(task)
-        num_workers = min(args.threads, len(args.hosts))
-        threads = []
-        for _ in range(num_workers):
-            thread = threading.Thread(target=worker)
-            thread.start()
-            threads.append(thread)
         try:
-            while True:
-                for thread in threads:
-                    thread.join(1)
+            num_workers = min(args.threads, len(args.hosts))
+            start_workers(num_workers)
         except KeyboardInterrupt:
+            log.info(red("terminating"))
             stop.set()
 
 
