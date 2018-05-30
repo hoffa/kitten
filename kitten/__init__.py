@@ -15,31 +15,6 @@ from six.moves import range, queue
 
 __version__ = "0.2.3"
 
-log = logging.getLogger(__name__)
-log.setLevel(logging.INFO)
-log.addHandler(logging.StreamHandler(sys.stdout))
-
-
-def color(s, code):
-    if sys.stdout.isatty():
-        return "\033[{}m{}\033[0m".format(code, s)
-    return s
-
-
-def red(s):
-    return color(s, 31)
-
-
-def green(s):
-    return color(s, 32)
-
-
-def yellow(s):
-    return color(s, 33)
-
-
-OK = green("ok")
-FAIL = red("fail")
 CHUNK_SIZE = 100
 DEFAULT = {"threads": 10, "timeout": 15}
 HELP = {
@@ -58,8 +33,30 @@ HELP = {
     "values": "list of instance IDs or resource names",
 }
 
+log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
+log.addHandler(logging.StreamHandler(sys.stdout))
+
 tasks = queue.Queue()
 stop = threading.Event()
+
+
+def color(s, code):
+    if sys.stdout.isatty():
+        return "\033[{}m{}\033[0m".format(code, s)
+    return s
+
+
+def red(s):
+    return color(s, 31)
+
+
+def green(s):
+    return color(s, 32)
+
+
+def yellow(s):
+    return color(s, 33)
 
 
 def chunks(l, n):
@@ -119,7 +116,7 @@ def run(conn, command, sudo):
     with conn as c:
         func = c.sudo if sudo else c.run
         result = func(command, pty=True, hide=True, warn=True, in_stream=False)
-    print_conn(conn, OK if result.ok else FAIL)
+    print_conn(conn, green("ok") if result.ok else red("fail"))
     print_conn(conn, result.stdout)
 
 
@@ -129,10 +126,10 @@ def put(conn, local, remote):
         with conn as c:
             c.put(local, remote=remote)
     except Exception as e:
-        print_conn(conn, FAIL)
+        print_conn(conn, red("fail"))
         print_conn(conn, str(e))
     else:
-        print_conn(conn, OK)
+        print_conn(conn, green("ok"))
 
 
 def get(conn, remote):
@@ -146,10 +143,10 @@ def get(conn, remote):
         with conn as c:
             c.get(remote, local=local)
     except Exception as e:
-        print_conn(conn, FAIL)
+        print_conn(conn, red("fail"))
         print_conn(conn, str(e))
     else:
-        print_conn(conn, OK)
+        print_conn(conn, green("ok"))
 
 
 def get_tasks(args):
@@ -209,7 +206,7 @@ def parse_args():
     run_parser = subparsers.add_parser("run")
     run_parser.add_argument("-i", help=HELP["i"])
     run_parser.add_argument(
-        "--timeout", type=int, default=DEFAULT["timeout"], help=HELP["timeout"]
+        "--timeout", type=float, default=DEFAULT["timeout"], help=HELP["timeout"]
     )
     run_parser.add_argument(
         "--threads", type=int, default=DEFAULT["threads"], help=HELP["threads"]
@@ -222,7 +219,7 @@ def parse_args():
     get_parser = subparsers.add_parser("get")
     get_parser.add_argument("-i", help=HELP["i"])
     get_parser.add_argument(
-        "--timeout", type=int, default=DEFAULT["timeout"], help=HELP["timeout"]
+        "--timeout", type=float, default=DEFAULT["timeout"], help=HELP["timeout"]
     )
     get_parser.add_argument(
         "--threads", type=int, default=DEFAULT["threads"], help=HELP["threads"]
@@ -234,7 +231,7 @@ def parse_args():
     put_parser = subparsers.add_parser("put")
     put_parser.add_argument("-i", help=HELP["i"])
     put_parser.add_argument(
-        "--timeout", type=int, default=DEFAULT["timeout"], help=HELP["timeout"]
+        "--timeout", type=float, default=DEFAULT["timeout"], help=HELP["timeout"]
     )
     put_parser.add_argument(
         "--threads", type=int, default=DEFAULT["threads"], help=HELP["threads"]
