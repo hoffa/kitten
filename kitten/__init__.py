@@ -109,47 +109,47 @@ def ip(values, kind, public, region_name):
     print_ips(ec2, instance_ids, public, region_name)
 
 
-def host_print(host, s):
+def print_conn(conn, s):
     for line in s.splitlines():
-        log.info(yellow(host) + "\t" + line)
+        log.info(yellow(conn.host) + "\t" + line)
 
 
 def run(conn, command, sudo):
-    log.info("{}\t{}\t{}".format(yellow(conn.host), yellow("run"), command))
+    print_conn(conn, "{}\t{}".format(yellow("run"), command))
     with conn as c:
         func = c.sudo if sudo else c.run
         result = func(command, pty=True, hide=True, warn=True, in_stream=False)
-    host_print(conn.host, OK if result.ok else FAIL)
-    host_print(conn.host, result.stdout)
+    print_conn(conn, OK if result.ok else FAIL)
+    print_conn(conn, result.stdout)
 
 
 def put(conn, local, remote):
-    log.info("{}\t{}\t{}\t{}".format(yellow(conn.host), yellow("put"), local, remote))
+    print_conn(conn, "{}\t{}\t{}".format(yellow("put"), local, remote))
     try:
         with conn as c:
             c.put(local, remote=remote)
     except Exception as e:
-        host_print(conn.host, FAIL)
-        host_print(conn.host, str(e))
+        print_conn(conn, FAIL)
+        print_conn(conn, str(e))
     else:
-        host_print(conn.host, OK)
+        print_conn(conn, OK)
 
 
 def get(conn, remote):
+    local = conn.host + "/" + os.path.basename(remote)
+    print_conn(conn, "{}\t{}\t{}".format(yellow("get"), remote, local))
     try:
         os.mkdir(conn.host)
     except OSError:
         pass
-    local = conn.host + "/" + os.path.basename(remote)
-    log.info("{}\t{}\t{}\t{}".format(yellow(conn.host), yellow("get"), remote, local))
     try:
         with conn as c:
             c.get(remote, local=local)
     except Exception as e:
-        host_print(conn.host, FAIL)
-        host_print(conn.host, str(e))
+        print_conn(conn, FAIL)
+        print_conn(conn, str(e))
     else:
-        host_print(conn.host, OK)
+        print_conn(conn, OK)
 
 
 def get_tasks(args):
