@@ -15,8 +15,12 @@ from six.moves import range, queue
 
 __version__ = "0.2.0"
 
+log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
+log.addHandler(logging.StreamHandler())
+
 CHUNK_SIZE = 100
-DEFAULT = {"timeout": 15, "threads": 10}
+DEFAULT = {'threads': 10, "timeout": 15}
 HELP = {
     "command": "shell command to execute",
     "hosts": "list of IP addresses",
@@ -32,10 +36,6 @@ HELP = {
     "user": "remote connection user",
     "values": "list of instance IDs or resource names",
 }
-
-log = logging.getLogger(__name__)
-log.setLevel(logging.INFO)
-log.addHandler(logging.StreamHandler())
 
 tasks = queue.Queue()
 stop = threading.Event()
@@ -162,7 +162,7 @@ def worker():
             break
 
 
-def start_workers(num_workers):
+def run_workers(num_workers):
     threads = []
     for _ in range(num_workers):
         thread = threading.Thread(target=worker)
@@ -239,7 +239,7 @@ def main():
             tasks.put_nowait(task)
         try:
             num_workers = min(args.threads, len(args.hosts))
-            start_workers(num_workers)
+            run_workers(num_workers)
         except KeyboardInterrupt:
             log.info(red("terminating"))
             stop.set()
