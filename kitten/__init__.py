@@ -158,7 +158,11 @@ def get_tasks(args):
             host,
             user=args.user,
             connect_timeout=args.timeout,
-            connect_kwargs={"key_filename": args.i},
+            connect_kwargs={
+                "key_filename": args.i,
+                "auth_timeout": args.timeout,
+                "banner_timeout": args.timeout,
+            },
         )
         for host in args.hosts
     ]
