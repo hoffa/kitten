@@ -2,7 +2,9 @@
 
 [![Build Status](https://travis-ci.org/hoffa/kitten.svg?branch=master)](https://travis-ci.org/hoffa/kitten) [![Maintainability](https://api.codeclimate.com/v1/badges/34e6b84000b2ab0e1bce/maintainability)](https://codeclimate.com/github/hoffa/kitten/maintainability) [![PyPI - Python Version](https://svgshare.com/i/6tK.svg)](https://pypi.org/project/kitten)
 
-Tiny multi-server automation tool. Designed to be as simple as possible.
+Tiny multi-server automation tool.
+
+It's designed to be as simple as possible and play nice with Unix tools.
 
 ## Install
 
