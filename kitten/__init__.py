@@ -19,6 +19,27 @@ log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
 log.addHandler(logging.StreamHandler(sys.stdout))
 
+
+def color(s, code):
+    if sys.stdout.isatty():
+        return "\033[{}m{}\033[0m".format(code, s)
+    return s
+
+
+def red(s):
+    return color(s, 31)
+
+
+def green(s):
+    return color(s, 32)
+
+
+def yellow(s):
+    return color(s, 33)
+
+
+OK = green("ok")
+FAIL = red("fail")
 CHUNK_SIZE = 100
 DEFAULT = {"threads": 10, "timeout": 15}
 HELP = {
@@ -39,20 +60,6 @@ HELP = {
 
 tasks = queue.Queue()
 stop = threading.Event()
-
-
-def color(s, code):
-    if sys.stdout.isatty():
-        return "\033[{}m{}\033[0m".format(code, s)
-    return s
-
-
-def red(s):
-    return color(s, 31)
-
-
-def yellow(s):
-    return color(s, 33)
 
 
 def chunks(l, n):
@@ -102,28 +109,30 @@ def ip(values, kind, public, region_name):
     print_ips(ec2, instance_ids, public, region_name)
 
 
+def host_print(host, s):
+    for line in s.splitlines():
+        log.info(yellow(host) + "\t" + line)
+
+
 def run(conn, command, sudo):
-    log.info("{}\trun {}".format(yellow(conn.host), yellow(command)))
+    log.info("{}\t{}\t{}".format(yellow(conn.host), yellow("run"), command))
     with conn as c:
         func = c.sudo if sudo else c.run
         result = func(command, pty=True, hide=True, warn=True, in_stream=False)
-    for line in result.stdout.splitlines():
-        if result.failed:
-            line = red(line)
-        log.info(yellow(conn.host) + "\t" + line)
+    host_print(conn.host, OK if result.ok else FAIL)
+    host_print(conn.host, result.stdout)
 
 
 def put(conn, local, remote):
-    log.info(
-        "{}\tput {} to {}".format(yellow(conn.host), yellow(local), yellow(remote))
-    )
-    result = "ok"
+    log.info("{}\t{}\t{}\t{}".format(yellow(conn.host), yellow("put"), local, remote))
     try:
         with conn as c:
             c.put(local, remote=remote)
     except Exception as e:
-        result = red(str(e))
-    log.info(yellow(conn.host) + " " + result)
+        host_print(conn.host, FAIL)
+        host_print(conn.host, str(e))
+    else:
+        host_print(conn.host, OK)
 
 
 def get(conn, remote):
@@ -132,16 +141,15 @@ def get(conn, remote):
     except OSError:
         pass
     local = conn.host + "/" + os.path.basename(remote)
-    log.info(
-        "{}\tget {} to {}".format(yellow(conn.host), yellow(remote), yellow(local))
-    )
-    result = "ok"
+    log.info("{}\t{}\t{}\t{}".format(yellow(conn.host), yellow("get"), remote, local))
     try:
         with conn as c:
             c.get(remote, local=local)
     except Exception as e:
-        result = red(str(e))
-    log.info(yellow(conn.host) + " " + result)
+        host_print(conn.host, FAIL)
+        host_print(conn.host, str(e))
+    else:
+        host_print(conn.host, OK)
 
 
 def get_tasks(args):
