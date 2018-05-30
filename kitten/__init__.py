@@ -103,18 +103,20 @@ def ip(values, kind, public, region_name):
 
 
 def run(conn, command, sudo):
-    log.info("{} run {}".format(yellow(conn.host), yellow(command)))
+    log.info("{}\trun {}".format(yellow(conn.host), yellow(command)))
     with conn as c:
         func = c.sudo if sudo else c.run
         result = func(command, pty=True, hide=True, warn=True, in_stream=False)
     for line in result.stdout.splitlines():
         if result.failed:
             line = red(line)
-        log.info(yellow(conn.host) + " " + line)
+        log.info(yellow(conn.host) + "\t" + line)
 
 
 def put(conn, local, remote):
-    log.info("{} put {} to {}".format(yellow(conn.host), yellow(local), yellow(remote)))
+    log.info(
+        "{}\tput {} to {}".format(yellow(conn.host), yellow(local), yellow(remote))
+    )
     result = "ok"
     try:
         with conn as c:
@@ -130,7 +132,9 @@ def get(conn, remote):
     except OSError:
         pass
     local = conn.host + "/" + os.path.basename(remote)
-    log.info("{} get {} to {}".format(yellow(conn.host), yellow(remote), yellow(local)))
+    log.info(
+        "{}\tget {} to {}".format(yellow(conn.host), yellow(remote), yellow(local))
+    )
     result = "ok"
     try:
         with conn as c:
