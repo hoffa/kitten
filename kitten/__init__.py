@@ -24,7 +24,7 @@ HELP = {
     "kind": "AWS resource type",
     "local": "path to local file",
     "public": "print public IPs where possible",
-    "region": "AWS region",
+    "region": "AWS region name",
     "remote": "path to remote file",
     "sudo": "run command via sudo",
     "threads": "number of concurrent connections",
