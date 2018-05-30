@@ -5,7 +5,9 @@ from __future__ import absolute_import, print_function, unicode_literals
 import argparse
 import functools
 import os
+import signal
 import sys
+import time
 import threading
 
 import boto3
@@ -33,6 +35,7 @@ HELP = {
 }
 
 tasks = queue.Queue()
+stop = threading.Event()
 
 
 def red(s):
@@ -129,20 +132,13 @@ def get(conn, remote):
 
 
 def worker():
-    try:
-        while True:
+    while not stop.is_set():
+        try:
             task = tasks.get_nowait()
             task()
             tasks.task_done()
-    except queue.Empty:
-        pass
-
-
-def start_workers(num_workers):
-    for _ in range(num_workers):
-        thread = threading.Thread(target=worker)
-        thread.daemon = True
-        thread.start()
+        except queue.Empty:
+            break
 
 
 def get_tasks(args):
@@ -228,8 +224,17 @@ def main():
         for task in get_tasks(args):
             tasks.put_nowait(task)
         num_workers = min(args.threads, len(args.hosts))
-        start_workers(num_workers)
-        tasks.join()
+        threads = []
+        for _ in range(num_workers):
+            thread = threading.Thread(target=worker)
+            thread.start()
+            threads.append(thread)
+        try:
+            while True:
+                for thread in threads:
+                    thread.join(1)
+        except KeyboardInterrupt:
+            stop.set()
 
 
 if __name__ == "__main__":
