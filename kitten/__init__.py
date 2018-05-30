@@ -13,7 +13,7 @@ import boto3
 import fabric
 from six.moves import range, queue
 
-__version__ = "0.2.2"
+__version__ = "0.2.3"
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
