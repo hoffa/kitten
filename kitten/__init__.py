@@ -6,6 +6,7 @@ import argparse
 import functools
 import logging
 import os
+import signal
 import sys
 import threading
 
@@ -13,7 +14,7 @@ import boto3
 import fabric
 from six.moves import range, queue
 
-__version__ = "0.2.4"
+__version__ = "0.2.5"
 
 CHUNK_SIZE = 100
 DEFAULT = {"threads": 10, "timeout": 15}
@@ -251,6 +252,7 @@ def parse_args():
 
 def main():
     args = parse_args()
+    signal.signal(signal.SIGPIPE, signal.SIG_DFL)
     if args.tool == "ip":
         ip(args.values, args.kind, args.public, args.region)
     else:
