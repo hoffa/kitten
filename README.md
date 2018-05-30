@@ -48,10 +48,10 @@ You can change region using `--region`.
 
 ```Shell
 $ kitten run uptime ubuntu 18.105.107.20 34.229.135.48
-18.105.107.20 run uptime
-34.229.135.48 run uptime
-18.105.107.20 17:11:48 up 1 day,  6:02,  0 users,  load average: 0.91, 2.99, 3.49
-34.229.135.48 17:11:48 up 5 days, 11:19,  0 users,  load average: 6.34, 5.94, 5.72
+18.105.107.20	run	uptime
+34.229.135.48	run	uptime
+18.105.107.20	17:11:48 up 1 day,  6:02,  0 users,  load average: 0.91, 2.99, 3.49
+34.229.135.48	17:11:48 up 5 days, 11:19,  0 users,  load average: 6.34, 5.94, 5.72
 ```
 
 Replace `ubuntu` with the user used to log in on the servers.
