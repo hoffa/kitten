@@ -13,7 +13,7 @@ import boto3
 import fabric
 from six.moves import range, queue
 
-__version__ = "0.1.20"
+__version__ = "0.2.0"
 
 CHUNK_SIZE = 100
 DEFAULT = {"timeout": 15, "threads": 10}
@@ -51,7 +51,7 @@ def yellow(s):
 
 def chunks(l, n):
     for i in range(0, len(l), n):
-        yield l[i : i + n]
+        yield l[i: i + n]
 
 
 def instance_ids_to_ips(resource, instance_ids):
