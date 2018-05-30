@@ -20,7 +20,7 @@ log.setLevel(logging.INFO)
 log.addHandler(logging.StreamHandler())
 
 CHUNK_SIZE = 100
-DEFAULT = {'threads': 10, "timeout": 15}
+DEFAULT = {"threads": 10, "timeout": 15}
 HELP = {
     "command": "shell command to execute",
     "hosts": "list of IP addresses",
@@ -51,7 +51,7 @@ def yellow(s):
 
 def chunks(l, n):
     for i in range(0, len(l), n):
-        yield l[i: i + n]
+        yield l[i : i + n]
 
 
 def instance_ids_to_ips(resource, instance_ids):
