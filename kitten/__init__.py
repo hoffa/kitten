@@ -41,12 +41,18 @@ tasks = queue.Queue()
 stop = threading.Event()
 
 
+def color(s, code):
+    if sys.stdout.isatty():
+        return "\033[{}m{}\033[0m".format(code, s)
+    return s
+
+
 def red(s):
-    return "\033[31m" + s + "\033[0m"
+    return color(s, 31)
 
 
 def yellow(s):
-    return "\033[33m" + s + "\033[0m"
+    return color(s, 33)
 
 
 def chunks(l, n):
