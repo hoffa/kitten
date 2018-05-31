@@ -44,9 +44,9 @@ tasks = queue.Queue()
 stop = threading.Event()
 
 
-def color(s, code):
+def color(s, code, bold=False):
     if sys.stdout.isatty():
-        return "\033[{}m{}\033[0m".format(code, s)
+        return "\033[{}m{}{}\033[0m".format(code, "\033[1m" if bold else "", s)
     return s
 
 
@@ -262,7 +262,7 @@ def parse_args():
 
 
 def main():
-    # signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+    signal.signal(signal.SIGPIPE, signal.SIG_DFL)
     args = parse_args()
     if args.tool == "ip":
         ip(args.values, args.kind, args.public, args.region)
