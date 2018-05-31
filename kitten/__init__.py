@@ -24,7 +24,7 @@ HELP = {
     "i": "private key path",
     "kind": "AWS resource type",
     "local": "path to local file",
-    "public": "print public IPs where possible",
+    "public": "print public IP addresses if possible",
     "region": "AWS region name",
     "remote": "path to remote file",
     "sudo": "run command via sudo",
@@ -67,7 +67,7 @@ def chunks(l, n):
         yield l[i : i + n]
 
 
-def instance_ids_to_ips(resource, instance_ids):
+def instance_ids_to_ip_addrs(resource, instance_ids):
     filters = [{"Name": "instance-id", "Values": instance_ids}]
     for instance in resource.instances.filter(Filters=filters):
         yield {
@@ -90,9 +90,9 @@ def elbs_to_instance_ids(client, elb_names):
             yield instance["InstanceId"]
 
 
-def print_ips(client, instance_ids, public, region_name):
+def print_ip_addrs(client, instance_ids, public, region_name):
     for chunk in chunks(list(instance_ids), CHUNK_SIZE):
-        for ip in instance_ids_to_ips(client, chunk):
+        for ip in instance_ids_to_ip_addrs(client, chunk):
             log.info(public and ip["public"] or ip["private"])
 
 
@@ -106,7 +106,7 @@ def ip(values, kind, public, region_name):
         elb = boto3.client("elb", region_name=region_name)
         instance_ids = elbs_to_instance_ids(elb, values)
     ec2 = boto3.resource("ec2", region_name=region_name)
-    print_ips(ec2, instance_ids, public, region_name)
+    print_ip_addrs(ec2, instance_ids, public, region_name)
 
 
 def print_conn(conn, s):
