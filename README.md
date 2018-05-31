@@ -70,14 +70,6 @@ Use `--sudo` to run commands via `sudo`.
 
 Use `-i` to specify a private key.
 
-### Get IP addresses and run command in one step
-
-Just pipe `kitten ip` to [`xargs`](http://man7.org/linux/man-pages/man1/xargs.1.html):
-
-```Shell
-kitten ip asg big-prod-asg-name | xargs kitten run 'rm -rf /tmp' root
-```
-
 ### Download files
 
 ```Shell
