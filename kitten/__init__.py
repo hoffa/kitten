@@ -14,7 +14,7 @@ import boto3
 import fabric
 from six.moves import range, queue
 
-__version__ = "0.2.5"
+__version__ = "0.2.6"
 
 CHUNK_SIZE = 100
 DEFAULT = {"threads": 10, "timeout": 15}
@@ -114,11 +114,16 @@ def print_conn(conn, s):
 
 def run(conn, command, sudo):
     print_conn(conn, "{}\t{}".format(yellow("run"), command))
-    with conn as c:
-        func = c.sudo if sudo else c.run
-        result = func(command, pty=True, hide=True, warn=True, in_stream=False)
-    print_conn(conn, green("ok") if result.ok else red("fail"))
-    print_conn(conn, result.stdout)
+    try:
+        with conn as c:
+            func = c.sudo if sudo else c.run
+            result = func(command, pty=True, hide=True, warn=True, in_stream=False)
+    except Exception as e:
+        print_conn(conn, red("fail"))
+        print_conn(conn, str(e))
+    else:
+        print_conn(conn, green("ok") if result.ok else red("fail"))
+        print_conn(conn, result.stdout)
 
 
 def put(conn, local, remote):
@@ -251,8 +256,8 @@ def parse_args():
 
 
 def main():
-    args = parse_args()
     signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+    args = parse_args()
     if args.tool == "ip":
         ip(args.values, args.kind, args.public, args.region)
     else:
