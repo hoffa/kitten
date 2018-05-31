@@ -40,12 +40,6 @@ $ kitten ip id i-04703bf3e6fab1926 i-07f234d0f29113ef2
 24.129.235.48
 ```
 
-```Shell
-$ kitten ip asg my-asg-name
-18.105.107.20
-34.229.135.48
-```
-
 You can change region using `--region`.
 
 By default only private IP addresses are printed. Use `--public` if you prefer public IPs.
@@ -79,5 +73,5 @@ kitten ip elb big-prod-elb | xargs kitten get -i ~/.ssh/key.pem /tmp/system.log 
 ### Upload file
 
 ```Shell
-kitten ip --region ap-northeast-2 elb big-prod-elb | xargs kitten put cat.jpg /root/cat.jpg root
+kitten ip --region ap-northeast-2 asg big-prod-asg | xargs kitten put cat.jpg /root/cat.jpg root
 ```
