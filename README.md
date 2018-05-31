@@ -6,6 +6,8 @@ Tiny multi-server automation tool.
 
 It's designed to be as simple as possible and play nice with Unix tools.
 
+![Screenshot](https://i.imgur.com/Qtx2WyC.png)
+
 ## Install
 
 ```Shell
@@ -38,15 +40,9 @@ $ kitten ip id i-04703bf3e6fab1926 i-07f234d0f29113ef2
 24.129.235.48
 ```
 
-```Shell
-$ kitten ip asg my-asg-name
-18.105.107.20
-34.229.135.48
-```
-
 You can change region using `--region`.
 
-By default private IP addresses are printed. Use `--public` if you prefer public IPs.
+By default only private IP addresses are printed. Use `--public` if you prefer public IPs.
 
 ### Run command on servers
 
@@ -68,14 +64,6 @@ Use `--sudo` to run commands via `sudo`.
 
 Use `-i` to specify a private key.
 
-### Get IP addresses and run command in one step
-
-Just pipe `kitten ip` to [`xargs`](http://man7.org/linux/man-pages/man1/xargs.1.html):
-
-```Shell
-kitten ip asg big-prod-asg-name | xargs kitten run 'rm -rf /tmp' root
-```
-
 ### Download files
 
 ```Shell
@@ -85,5 +73,5 @@ kitten ip elb big-prod-elb | xargs kitten get -i ~/.ssh/key.pem /tmp/system.log 
 ### Upload file
 
 ```Shell
-kitten ip --region ap-northeast-2 elb big-prod-elb | xargs kitten put cat.jpg /root/cat.jpg root
+kitten ip asg big-prod-asg --region ap-northeast-2 | xargs kitten put cat.jpg /root/cat.jpg root
 ```
