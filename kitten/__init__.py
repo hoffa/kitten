@@ -67,6 +67,69 @@ def chunks(l, n):
         yield l[i : i + n]
 
 
+class Connection(object):
+    """
+    Encapsulates an SSH connection.
+    """
+
+    def __init__(self, host, user, timeout, key_filename):
+        self.host = host
+        self.conn = fabric.Connection(
+            host,
+            user=user,
+            connect_timeout=timeout,
+            connect_kwargs={
+                "key_filename": key_filename,
+                "auth_timeout": timeout,
+                "banner_timeout": timeout,
+            },
+        )
+
+    def print(self, s):
+        for line in s.splitlines():
+            log.info(yellow(self.host) + "\t" + line)
+
+    def run(self, command, sudo):
+        self.print("{}\t{}".format(yellow("run"), command))
+        try:
+            with self.conn as c:
+                func = c.sudo if sudo else c.run
+                result = func(command, pty=True, hide=True, warn=True, in_stream=False)
+        except Exception as e:
+            self.print(red("fail"))
+            self.print(str(e))
+        else:
+            self.print(green("ok") if result.ok else red("fail"))
+            self.print(result.stdout)
+
+    def put(self, local, remote):
+        self.print("{}\t{}\t{}".format(yellow("put"), local, remote))
+        try:
+            with self.conn as c:
+                c.put(local, remote=remote)
+        except Exception as e:
+            self.print(red("fail"))
+            self.print(str(e))
+        else:
+            self.print(green("ok"))
+
+    def get(self, remote):
+        local = self.host + "/" + os.path.basename(remote)
+        self.print("{}\t{}\t{}".format(yellow("get"), remote, local))
+        try:
+            os.mkdir(self.host)
+        except OSError:
+            pass
+        try:
+            with self.conn as c:
+                c.get(remote, local=local)
+        except Exception as e:
+            self.print(red("fail"))
+            self.print(str(e))
+        else:
+            self.print(green("ok"))
+
+
 def instance_ids_to_ip_addrs(resource, instance_ids):
     filters = [{"Name": "instance-id", "Values": instance_ids}]
     for instance in resource.instances.filter(Filters=filters):
@@ -97,6 +160,7 @@ def print_ip_addrs(client, instance_ids, public, region_name):
 
 
 def ip(values, kind, public, region_name):
+    print("here")
     if kind == "id":
         instance_ids = values
     elif kind == "asg":
@@ -109,74 +173,14 @@ def ip(values, kind, public, region_name):
     print_ip_addrs(ec2, instance_ids, public, region_name)
 
 
-def print_conn(conn, s):
-    for line in s.splitlines():
-        log.info(yellow(conn.host) + "\t" + line)
-
-
-def run(conn, command, sudo):
-    print_conn(conn, "{}\t{}".format(yellow("run"), command))
-    try:
-        with conn as c:
-            func = c.sudo if sudo else c.run
-            result = func(command, pty=True, hide=True, warn=True, in_stream=False)
-    except Exception as e:
-        print_conn(conn, red("fail"))
-        print_conn(conn, str(e))
-    else:
-        print_conn(conn, green("ok") if result.ok else red("fail"))
-        print_conn(conn, result.stdout)
-
-
-def put(conn, local, remote):
-    print_conn(conn, "{}\t{}\t{}".format(yellow("put"), local, remote))
-    try:
-        with conn as c:
-            c.put(local, remote=remote)
-    except Exception as e:
-        print_conn(conn, red("fail"))
-        print_conn(conn, str(e))
-    else:
-        print_conn(conn, green("ok"))
-
-
-def get(conn, remote):
-    local = conn.host + "/" + os.path.basename(remote)
-    print_conn(conn, "{}\t{}\t{}".format(yellow("get"), remote, local))
-    try:
-        os.mkdir(conn.host)
-    except OSError:
-        pass
-    try:
-        with conn as c:
-            c.get(remote, local=local)
-    except Exception as e:
-        print_conn(conn, red("fail"))
-        print_conn(conn, str(e))
-    else:
-        print_conn(conn, green("ok"))
-
-
 def get_tasks(args):
-    conns = [
-        fabric.Connection(
-            host,
-            user=args.user,
-            connect_timeout=args.timeout,
-            connect_kwargs={
-                "key_filename": args.i,
-                "auth_timeout": args.timeout,
-                "banner_timeout": args.timeout,
-            },
-        )
-        for host in args.hosts
-    ]
+    conns = [Connection(host, args.user, args.timeout, args.i) for host in args.hosts]
     if args.tool == "run":
-        return [functools.partial(run, conn, args.command, args.sudo) for conn in conns]
+        return [functools.partial(conn.run, args.command, args.sudo) for conn in conns]
     elif args.tool == "get":
-        return [functools.partial(get, conn, args.remote) for conn in conns]
+        return [functools.partial(conn.get, args.remote) for conn in conns]
     elif args.tool == "put":
-        return [functools.partial(put, conn, args.local, args.remote) for conn in conns]
+        return [functools.partial(conn.put, args.local, args.remote) for conn in conns]
 
 
 def worker():
@@ -258,7 +262,7 @@ def parse_args():
 
 
 def main():
-    signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+    # signal.signal(signal.SIGPIPE, signal.SIG_DFL)
     args = parse_args()
     if args.tool == "ip":
         ip(args.values, args.kind, args.public, args.region)
