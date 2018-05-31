@@ -151,6 +151,16 @@ def instance_ids_to_ip_addrs(resource, instance_ids):
         }
 
 
+def opsworks_layer_ids_to_ip_addrs(client, layer_ids):
+    for layer_id in layer_ids:
+        instances = client.describe_instances(LayerId=layer_id)
+        for instance in instances["Instances"]:
+            yield {
+                "public": instance.get("PublicIp"),
+                "private": instance.get("PrivateIp"),
+            }
+
+
 def asgs_to_instance_ids(client, asg_names):
     asgs = client.describe_auto_scaling_groups(AutoScalingGroupNames=asg_names)
     for asg in asgs["AutoScalingGroups"]:
@@ -165,23 +175,32 @@ def elbs_to_instance_ids(client, elb_names):
             yield instance["InstanceId"]
 
 
-def print_ip_addrs(client, instance_ids, public, region_name):
-    for chunk in chunks(list(instance_ids), CHUNK_SIZE):
-        for ip in instance_ids_to_ip_addrs(client, chunk):
-            log.info(public and ip["public"] or ip["private"])
+def print_ip_addrs(ip_addrs, public):
+    for ip_addr in ip_addrs:
+        public_ip = ip_addr["public"]
+        private_ip = ip_addr["private"]
+        if public and public_ip:
+            log.info(public_ip)
+        elif private_ip:
+            log.info(private_ip)
 
 
 def ip(values, kind, public, region_name):
-    if kind == "id":
-        instance_ids = values
-    elif kind == "asg":
-        autoscaling = boto3.client("autoscaling", region_name=region_name)
-        instance_ids = asgs_to_instance_ids(autoscaling, values)
-    elif kind == "elb":
-        elb = boto3.client("elb", region_name=region_name)
-        instance_ids = elbs_to_instance_ids(elb, values)
-    ec2 = boto3.resource("ec2", region_name=region_name)
-    print_ip_addrs(ec2, instance_ids, public, region_name)
+    if kind == "opsworks":
+        opsworks = boto3.client("opsworks", region_name=region_name)
+        print_ip_addrs(opsworks_layer_ids_to_ip_addrs(opsworks, values), public)
+    else:
+        if kind == "id":
+            instance_ids = values
+        elif kind == "asg":
+            autoscaling = boto3.client("autoscaling", region_name=region_name)
+            instance_ids = asgs_to_instance_ids(autoscaling, values)
+        elif kind == "elb":
+            elb = boto3.client("elb", region_name=region_name)
+            instance_ids = elbs_to_instance_ids(elb, values)
+        ec2 = boto3.resource("ec2", region_name=region_name)
+        for chunk in chunks(list(instance_ids), CHUNK_SIZE):
+            print_ip_addrs(instance_ids_to_ip_addrs(ec2, chunk), public)
 
 
 def get_conns(args):
@@ -229,7 +248,9 @@ def parse_args():
     aws_parser = subparsers.add_parser("ip")
     aws_parser.add_argument("--region", help=HELP["region"])
     aws_parser.add_argument("--public", action="store_true", help=HELP["public"])
-    aws_parser.add_argument("kind", choices=("id", "asg", "elb"), help=HELP["kind"])
+    aws_parser.add_argument(
+        "kind", choices=("id", "asg", "elb", "opsworks"), help=HELP["kind"]
+    )
     aws_parser.add_argument("values", nargs="+", help=HELP["values"])
 
     run_parser = subparsers.add_parser("run")
