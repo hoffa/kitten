@@ -6,7 +6,7 @@ Tiny multi-server automation tool.
 
 It's designed to be as simple as possible and play nice with Unix tools.
 
-![](https://i.imgur.com/Qtx2WyC.png)
+![Screenshot](https://i.imgur.com/Qtx2WyC.png)
 
 ## Install
 
