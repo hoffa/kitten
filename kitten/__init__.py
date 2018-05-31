@@ -14,7 +14,7 @@ import boto3
 import fabric
 from six.moves import range, queue
 
-__version__ = "0.2.8"
+__version__ = "0.2.9"
 
 CHUNK_SIZE = 100
 DEFAULT = {"threads": 10, "timeout": 10}
@@ -52,12 +52,6 @@ def color(s, code=0, bold=False):
     if sys.stdout.isatty():
         return "{}{}{}{}".format(ansi(code), ansi(1) if bold else "", s, ansi(0))
     return s
-
-
-def get_colors():
-    for bold in (False, True):
-        for code in range(31, 37):
-            yield functools.partial(color, code=code, bold=bold)
 
 
 def red(s):
@@ -185,22 +179,27 @@ def print_ip_addrs(ip_addrs, public):
             log.info(private_ip)
 
 
-def ip(values, kind, public, region_name):
+def ip(values, kind, region_name):
     if kind == "opsworks":
         opsworks = boto3.client("opsworks", region_name=region_name)
-        print_ip_addrs(opsworks_layer_ids_to_ip_addrs(opsworks, values), public)
-    else:
-        if kind == "id":
-            instance_ids = values
-        elif kind == "asg":
-            autoscaling = boto3.client("autoscaling", region_name=region_name)
-            instance_ids = asgs_to_instance_ids(autoscaling, values)
-        elif kind == "elb":
-            elb = boto3.client("elb", region_name=region_name)
-            instance_ids = elbs_to_instance_ids(elb, values)
-        ec2 = boto3.resource("ec2", region_name=region_name)
-        for chunk in chunks(list(instance_ids), CHUNK_SIZE):
-            print_ip_addrs(instance_ids_to_ip_addrs(ec2, chunk), public)
+        return opsworks_layer_ids_to_ip_addrs(opsworks, values)
+    elif kind == "id":
+        instance_ids = values
+    elif kind == "asg":
+        autoscaling = boto3.client("autoscaling", region_name=region_name)
+        instance_ids = asgs_to_instance_ids(autoscaling, values)
+    elif kind == "elb":
+        elb = boto3.client("elb", region_name=region_name)
+        instance_ids = elbs_to_instance_ids(elb, values)
+    ec2 = boto3.resource("ec2", region_name=region_name)
+    for chunk in chunks(list(instance_ids), CHUNK_SIZE):
+        return instance_ids_to_ip_addrs(ec2, chunk)
+
+
+def get_colors():
+    for bold in (False, True):
+        for code in range(31, 37):
+            yield functools.partial(color, code=code, bold=bold)
 
 
 def get_conns(args):
@@ -304,7 +303,7 @@ def main():
     signal.signal(signal.SIGPIPE, signal.SIG_DFL)
     args = parse_args()
     if args.tool == "ip":
-        ip(args.values, args.kind, args.public, args.region)
+        print_ip_addrs(ip(args.values, args.kind, args.region), args.public)
     else:
         for task in get_tasks(args):
             tasks.put_nowait(task)
