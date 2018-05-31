@@ -44,10 +44,17 @@ tasks = queue.Queue()
 stop = threading.Event()
 
 
-def color(s, code, bold=False):
+def color(s, code=0, bold=False):
     if sys.stdout.isatty():
-        return "\033[{}m{}{}\033[0m".format(code, "\033[1m" if bold else "", s)
+        escape = lambda x: "\033[{}m".format(x)
+        return "{}{}{}{}".format(escape(code), escape(1) if bold else "", s, escape(0))
     return s
+
+
+def get_colors():
+    for bold in (False, True):
+        for code in range(31, 37):
+            yield functools.partial(color, code=code, bold=bold)
 
 
 def red(s):
@@ -72,8 +79,9 @@ class Connection(object):
     Encapsulates an SSH connection.
     """
 
-    def __init__(self, host, user, timeout, key_filename):
+    def __init__(self, host, user, timeout, key_filename, color):
         self.host = host
+        self.color = color
         self.conn = fabric.Connection(
             host,
             user=user,
@@ -87,7 +95,7 @@ class Connection(object):
 
     def print(self, s):
         for line in s.splitlines():
-            log.info(yellow(self.host) + "\t" + line)
+            log.info(self.color(self.host) + "\t" + line)
 
     def run(self, command, sudo):
         self.print("{}\t{}".format(yellow("run"), command))
@@ -160,7 +168,6 @@ def print_ip_addrs(client, instance_ids, public, region_name):
 
 
 def ip(values, kind, public, region_name):
-    print("here")
     if kind == "id":
         instance_ids = values
     elif kind == "asg":
@@ -173,8 +180,14 @@ def ip(values, kind, public, region_name):
     print_ip_addrs(ec2, instance_ids, public, region_name)
 
 
+def get_conns(args):
+    colors = list(get_colors())
+    for i, host in enumerate(args.hosts):
+        yield Connection(host, args.user, args.timeout, args.i, colors[i % len(colors)])
+
+
 def get_tasks(args):
-    conns = [Connection(host, args.user, args.timeout, args.i) for host in args.hosts]
+    conns = get_conns(args)
     if args.tool == "run":
         return [functools.partial(conn.run, args.command, args.sudo) for conn in conns]
     elif args.tool == "get":
@@ -262,6 +275,7 @@ def parse_args():
 
 
 def main():
+    # Avoid throwing exception on SIGPIPE
     signal.signal(signal.SIGPIPE, signal.SIG_DFL)
     args = parse_args()
     if args.tool == "ip":
