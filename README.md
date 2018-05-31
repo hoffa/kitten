@@ -48,7 +48,7 @@ $ kitten ip asg my-asg-name
 
 You can change region using `--region`.
 
-By default private IP addresses are printed. Use `--public` if you prefer public IPs.
+By default only private IP addresses are printed. Use `--public` if you prefer public IPs.
 
 ### Run command on servers
 
