@@ -28,8 +28,10 @@ HELP = {
     "region": "AWS region name",
     "remote": "path to remote file",
     "sudo": "run command via sudo",
-    "threads": "number of concurrent connections",
-    "timeout": "connection timeout in seconds",
+    "threads": "number of concurrent connections (default: {})".format(
+        DEFAULT["threads"]
+    ),
+    "timeout": "connection timeout in seconds (default: {})".format(DEFAULT["timeout"]),
     "user": "remote connection user",
     "values": "list of instance IDs or resource names",
 }
