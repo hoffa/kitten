@@ -14,9 +14,7 @@ pip install kitten
 
 ## Prerequisites
 
-You can use kitten
-
-If you want kitten to be able to get IP addresses from AWS resources, you'll need to have credentials set up. You can do that using `awscli`:
+Kitten can get IP addresses from AWS resources for you. For that you'll need to have your AWS credentials set up. You can do that using `awscli`:
 
 ```Shell
 pip install awscli
