@@ -14,7 +14,7 @@ import boto3
 import fabric
 from six.moves import range, queue
 
-__version__ = "0.2.7"
+__version__ = "0.2.8"
 
 CHUNK_SIZE = 100
 DEFAULT = {"threads": 10, "timeout": 10}
@@ -110,7 +110,8 @@ class Connection(object):
             self.print(red("fail"))
             self.print(str(e))
         else:
-            self.print(green("ok") if result.ok else red("fail"))
+            if result.failed:
+                self.print(red("fail"))
             self.print(result.stdout)
 
     def put(self, local, remote):
