@@ -73,5 +73,5 @@ kitten ip elb big-prod-elb | xargs kitten get -i ~/.ssh/key.pem /tmp/system.log 
 ### Upload file
 
 ```Shell
-kitten ip --region ap-northeast-2 asg big-prod-asg | xargs kitten put cat.jpg /root/cat.jpg root
+kitten ip asg big-prod-asg --region ap-northeast-2 | xargs kitten put cat.jpg /root/cat.jpg root
 ```
