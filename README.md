@@ -32,7 +32,7 @@ aws configure
 
 ### Get IP addresses from AWS resources
 
-Use `kitten ip` with either `id`, `asg` or `elb`:
+Use `kitten ip` with either `id`, `asg`, `elb` or `opsworks`:
 
 ```Shell
 $ kitten ip id i-04703bf3e6fab1926 i-07f234d0f29113ef2
@@ -67,7 +67,7 @@ Use `-i` to specify a private key.
 ### Download files
 
 ```Shell
-kitten ip elb big-prod-elb | xargs kitten get -i ~/.ssh/key.pem /tmp/system.log ubuntu
+kitten ip opsworks a283c671-d4c1-4dfa-a7c2-823b7f7b2c2c | xargs kitten get /tmp/system.log ubuntu
 ```
 
 ### Upload file
