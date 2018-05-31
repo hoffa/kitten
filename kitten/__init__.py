@@ -44,10 +44,13 @@ tasks = queue.Queue()
 stop = threading.Event()
 
 
+def ansi(x):
+    return "\033[{}m".format(x)
+
+
 def color(s, code=0, bold=False):
     if sys.stdout.isatty():
-        escape = lambda x: "\033[{}m".format(x)
-        return "{}{}{}{}".format(escape(code), escape(1) if bold else "", s, escape(0))
+        return "{}{}{}{}".format(ansi(code), ansi(1) if bold else "", s, ansi(0))
     return s
 
 
