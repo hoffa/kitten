@@ -17,7 +17,7 @@ from six.moves import range, queue
 __version__ = "0.2.6"
 
 CHUNK_SIZE = 100
-DEFAULT = {"threads": 10, "timeout": 15}
+DEFAULT = {"threads": 10, "timeout": 10}
 HELP = {
     "command": "shell command to execute",
     "hosts": "list of IP addresses",
