@@ -5,10 +5,9 @@ python:
   - "3.5"
   - "3.6"
 install:
-  - pip install pycodestyle pyflakes
+  - pip install flake8
   - pip install .
 script:
-  - pyflakes .
-  - pycodestyle --ignore E203 --max-line-length 88 .
+  - flake8 --ignore E203 --max-line-length 88 .
   - python setup.py check --metadata --strict
   - python setup.py pytest
