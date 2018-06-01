@@ -32,7 +32,7 @@ aws configure
 
 ### Get IP addresses from AWS resources
 
-Use `kitten ip` with either `id`, `asg` or `elb`:
+Use `kitten ip` with either `id`, `asg`, `elb` or `opsworks`:
 
 ```Shell
 $ kitten ip id i-04703bf3e6fab1926 i-07f234d0f29113ef2
@@ -50,8 +50,6 @@ By default only private IP addresses are printed. Use `--public` if you prefer p
 $ kitten run uptime ubuntu 18.105.107.20 34.229.135.48
 18.105.107.20	run	uptime
 34.229.135.48	run	uptime
-18.105.107.20	ok
-34.229.135.48	ok
 18.105.107.20	17:11:48 up 1 day,  6:02,  0 users,  load average: 0.91, 2.99, 3.49
 34.229.135.48	17:11:48 up 5 days, 11:19,  0 users,  load average: 6.34, 5.94, 5.72
 ```
@@ -67,11 +65,11 @@ Use `-i` to specify a private key.
 ### Download files
 
 ```Shell
-kitten ip elb big-prod-elb | xargs kitten get -i ~/.ssh/key.pem /tmp/system.log ubuntu
+kitten ip opsworks a283c671-d4c1-4dfa-a7c2-823b7f7b2c2c | xargs kitten get /tmp/system.log ubuntu
 ```
 
 ### Upload file
 
 ```Shell
-kitten ip asg big-prod-asg --region ap-northeast-2 | xargs kitten put cat.jpg /root/cat.jpg root
+kitten ip asg big-prod-asg | xargs kitten put cat.jpg /root/cat.jpg root
 ```
