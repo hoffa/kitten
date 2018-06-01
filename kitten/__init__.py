@@ -14,7 +14,7 @@ import boto3
 import fabric
 from six.moves import range, queue
 
-__version__ = "0.2.9"
+__version__ = "0.2.10"
 
 CHUNK_SIZE = 100
 DEFAULT = {"threads": 10, "timeout": 10}
@@ -34,6 +34,7 @@ HELP = {
     "timeout": "connection timeout in seconds (default: {})".format(DEFAULT["timeout"]),
     "user": "remote connection user",
     "values": "list of instance IDs or resource names",
+    "verbose": "show more output",
 }
 
 log = logging.getLogger(__name__)
@@ -242,6 +243,7 @@ def run_workers(num_workers):
 def parse_args():
     parser = argparse.ArgumentParser(description="Tiny multi-server automation tool.")
     parser.add_argument("--version", action="version", version=__version__)
+    parser.add_argument("--verbose", action="store_true", help=HELP["verbose"])
     subparsers = parser.add_subparsers(dest="tool")
 
     aws_parser = subparsers.add_parser("ip")
@@ -302,6 +304,8 @@ def main():
     # Avoid throwing exception on SIGPIPE
     signal.signal(signal.SIGPIPE, signal.SIG_DFL)
     args = parse_args()
+    if args.verbose:
+        logging.basicConfig(level=logging.DEBUG)
     if args.tool == "ip":
         print_ip_addrs(ip(args.values, args.kind, args.region), args.public)
     else:
