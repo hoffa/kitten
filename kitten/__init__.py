@@ -96,7 +96,7 @@ class Connection(object):
             log.info(self.color(self.host) + "\t" + line)
 
     def run(self, command, sudo):
-        self.print("{}\t{}".format(yellow("run"), command))
+        self.print("{}\t{}".format(yellow("sudo" if sudo else "run"), command))
         try:
             with self.conn as c:
                 func = c.sudo if sudo else c.run
