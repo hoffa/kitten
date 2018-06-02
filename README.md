@@ -35,7 +35,7 @@ aws configure
 Use `kitten ip` with either `id`, `asg`, `elb` or `opsworks`:
 
 ```Shell
-$ kitten ip id i-04703bf3e6fab1926 i-07f234d0f29113ef2
+$ kitten ip asg my-tiny-asg
 18.135.117.17
 24.129.235.48
 ```
