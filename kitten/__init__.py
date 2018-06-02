@@ -49,22 +49,22 @@ def ansi(x):
     return "\033[{}m".format(x)
 
 
-def color(s, code=0, bold=False):
+def colored(s, code=0, bold=False):
     if sys.stdout.isatty():
         return "{}{}{}{}".format(ansi(code), ansi(1) if bold else "", s, ansi(0))
     return s
 
 
 def red(s):
-    return color(s, 31)
+    return colored(s, code=31)
 
 
 def green(s):
-    return color(s, 32)
+    return colored(s, code=32)
 
 
 def yellow(s):
-    return color(s, 33)
+    return colored(s, code=33)
 
 
 def chunks(l, n):
@@ -91,9 +91,9 @@ class Connection(object):
             },
         )
 
-    def print(self, s):
+    def print(self, s, color=colored):
         for line in s.splitlines():
-            log.info(self.color(self.host) + "\t" + line)
+            log.info(self.color(self.host) + "\t" + color(line))
 
     def run(self, command, sudo):
         self.print("{}\t{}".format(yellow("sudo" if sudo else "run"), command))
@@ -102,12 +102,10 @@ class Connection(object):
                 func = c.sudo if sudo else c.run
                 result = func(command, pty=True, hide=True, warn=True, in_stream=False)
         except Exception as e:
-            self.print(red("fail"))
-            self.print(str(e))
+            self.print(str(e), color=red)
         else:
-            if result.failed:
-                self.print(red("fail"))
-            self.print(result.stdout)
+            color = colored if result.ok else red
+            self.print(result.stdout, color=color)
 
     def put(self, local, remote):
         self.print("{}\t{}\t{}".format(yellow("put"), local, remote))
@@ -115,10 +113,9 @@ class Connection(object):
             with self.conn as c:
                 c.put(local, remote=remote)
         except Exception as e:
-            self.print(red("fail"))
-            self.print(str(e))
+            self.print(str(e), color=red)
         else:
-            self.print(green("ok"))
+            self.print("ok", color=green)
 
     def get(self, remote):
         local = self.host + "/" + os.path.basename(remote)
@@ -131,10 +128,9 @@ class Connection(object):
             with self.conn as c:
                 c.get(remote, local=local)
         except Exception as e:
-            self.print(red("fail"))
-            self.print(str(e))
+            self.print(str(e), color=red)
         else:
-            self.print(green("ok"))
+            self.print("ok", color=green)
 
 
 def instance_ids_to_ip_addrs(resource, instance_ids):
@@ -203,7 +199,7 @@ def get_ip_addrs(values, kind, region_name):
 def get_colors():
     for bold in (False, True):
         for code in range(31, 37):
-            yield functools.partial(color, code=code, bold=bold)
+            yield functools.partial(colored, code=code, bold=bold)
 
 
 def get_conns(args):
