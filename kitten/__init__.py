@@ -138,12 +138,16 @@ class Connection(object):
 
 
 def instance_ids_to_ip_addrs(resource, instance_ids):
-    filters = [{"Name": "instance-id", "Values": instance_ids}]
-    for instance in resource.instances.filter(Filters=filters):
-        yield {
-            "public": instance.public_ip_address,
-            "private": instance.private_ip_address,
-        }
+    # Send request in batches to avoid FilterLimitExceeded. Use Filters
+    # instead of InstanceIds to avoid exception on non-existent instance ID
+    # (e.g. during scale-out or when hastily pasting a bunch of text).
+    for chunk in chunks(list(instance_ids), CHUNK_SIZE):
+        filters = [{"Name": "instance-id", "Values": chunk}]
+        for instance in resource.instances.filter(Filters=filters):
+            yield {
+                "public": instance.public_ip_address,
+                "private": instance.private_ip_address,
+            }
 
 
 def opsworks_layer_ids_to_ip_addrs(client, layer_ids):
@@ -180,7 +184,7 @@ def print_ip_addrs(ip_addrs, public):
             log.info(private_ip)
 
 
-def ip(values, kind, region_name):
+def get_ip_addrs(values, kind, region_name):
     if kind == "opsworks":
         opsworks = boto3.client("opsworks", region_name=region_name)
         return opsworks_layer_ids_to_ip_addrs(opsworks, values)
@@ -193,8 +197,7 @@ def ip(values, kind, region_name):
         elb = boto3.client("elb", region_name=region_name)
         instance_ids = elbs_to_instance_ids(elb, values)
     ec2 = boto3.resource("ec2", region_name=region_name)
-    for chunk in chunks(list(instance_ids), CHUNK_SIZE):
-        return instance_ids_to_ip_addrs(ec2, chunk)
+    return instance_ids_to_ip_addrs(ec2, instance_ids)
 
 
 def get_colors():
@@ -301,13 +304,13 @@ def parse_args():
 
 
 def main():
-    # Avoid throwing exception on SIGPIPE
+    # Avoid throwing exception on SIGPIPE.
     signal.signal(signal.SIGPIPE, signal.SIG_DFL)
     args = parse_args()
     if args.verbose:
         logging.basicConfig(level=logging.DEBUG)
     if args.tool == "ip":
-        print_ip_addrs(ip(args.values, args.kind, args.region), args.public)
+        print_ip_addrs(get_ip_addrs(args.values, args.kind, args.region), args.public)
     else:
         for task in get_tasks(args):
             tasks.put_nowait(task)
