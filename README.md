@@ -1,4 +1,4 @@
-# 😽 kitten
+# :kissing_cat: kitten
 
 [![Build Status](https://travis-ci.org/hoffa/kitten.svg?branch=master)](https://travis-ci.org/hoffa/kitten) [![Maintainability](https://api.codeclimate.com/v1/badges/34e6b84000b2ab0e1bce/maintainability)](https://codeclimate.com/github/hoffa/kitten/maintainability) [![PyPI - Python Version](https://svgshare.com/i/6tK.svg)](https://pypi.org/project/kitten)
 
@@ -40,7 +40,7 @@ $ kitten ip asg my-tiny-asg
 24.129.235.48
 ```
 
-* By default only private IP addresses are printed. Use `--public` if you prefer public IPs.
+* By default only private IP addresses are returned. Use `--public` if you prefer public IPs.
 * You can change region using `--region`.
 
 ### Run command on servers
@@ -54,7 +54,7 @@ $ kitten run uptime ubuntu 18.105.107.20 34.229.135.48
 ```
 
 * Replace `ubuntu` with the user used to log in on the servers.
-* Use `-i` to specify a private key. Unless specified, behavior is similar to tools such as [`ssh`](http://man7.org/linux/man-pages/man1/ssh.1.html).
+* Use `-i` to specify a private key. Unless specified, behavior is similar to [`ssh`](http://man7.org/linux/man-pages/man1/ssh.1.html).
 * Commands are always run in parallel. Use `--threads` to specify the maximum number of concurrent connections (defaults to 10).
 * Use `--sudo` to run commands via `sudo`.
 
