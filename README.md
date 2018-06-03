@@ -58,6 +58,8 @@ $ kitten run uptime ubuntu 18.105.107.20 34.229.135.48
 * Use `--sudo` to run commands via `sudo`.
 * Use `-i` to specify a private key.
 
+Just pipe `kitten ip` to [`xargs`](http://man7.org/linux/man-pages/man1/xargs.1.html) to do everything in one step.
+
 ### Download files
 
 ```Shell
