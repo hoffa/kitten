@@ -74,4 +74,4 @@ kitten ip asg big-prod-asg | xargs kitten put cat.jpg /root/cat.jpg root
 
 ---
 
-<p align="center"><img alt="Kitten Logo" src="https://i.imgur.com/Rk3Vql3.png" width="50"></p>
+<img alt="Kitten Logo" src="https://i.imgur.com/Rk3Vql3.png" width="50" height="75">
