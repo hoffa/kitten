@@ -40,9 +40,8 @@ $ kitten ip asg my-tiny-asg
 24.129.235.48
 ```
 
-You can change region using `--region`.
-
-By default only private IP addresses are printed. Use `--public` if you prefer public IPs.
+* By default only private IP addresses are printed. Use `--public` if you prefer public IPs.
+* You can change region using `--region`.
 
 ### Run command on servers
 
@@ -54,13 +53,10 @@ $ kitten run uptime ubuntu 18.105.107.20 34.229.135.48
 34.229.135.48	17:11:48 up 5 days, 11:19,  0 users,  load average: 6.34, 5.94, 5.72
 ```
 
-Replace `ubuntu` with the user used to log in on the servers.
-
-Commands are always run in parallel. Use `--threads` to specify the maximum number of concurrent connections (defaults to 10).
-
-Use `--sudo` to run commands via `sudo`.
-
-Use `-i` to specify a private key.
+* Replace `ubuntu` with the user used to log in on the servers.
+* Commands are always run in parallel. Use `--threads` to specify the maximum number of concurrent connections (defaults to 10).
+* Use `--sudo` to run commands via `sudo`.
+* Use `-i` to specify a private key.
 
 ### Download files
 
