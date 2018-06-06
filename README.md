@@ -1,6 +1,6 @@
 <p align="center"><img alt="Kitten Logo" src="https://i.imgur.com/Rk3Vql3.png" height="150"></p>
 
-# kitten
+# :kissing_cat: kitten
 
 [![Build Status](https://travis-ci.org/hoffa/kitten.svg?branch=master)](https://travis-ci.org/hoffa/kitten) [![Maintainability](https://api.codeclimate.com/v1/badges/34e6b84000b2ab0e1bce/maintainability)](https://codeclimate.com/github/hoffa/kitten/maintainability) [![PyPI - Python Version](https://svgshare.com/i/6tK.svg)](https://pypi.org/project/kitten)
 
@@ -18,7 +18,7 @@ pip install kitten
 
 ## Prerequisites
 
-Kitten can get IP addresses from AWS resources for you. For that you'll need to have your AWS credentials set up. You can do that using `awscli`:
+`kitten` can get IP addresses from AWS resources for you. For that you'll need to have your AWS credentials set up. You can do that using `awscli`:
 
 ```Shell
 pip install awscli
