@@ -52,7 +52,8 @@ def ansi(x):
 def colored(s, code=0, bold=False):
     has_attr = code > 0 or bold
     if has_attr and sys.stdout.isatty() and "NO_COLOR" not in os.environ:
-        return "{}{}{}{}".format(ansi(code), ansi(1) if bold else "", s, ansi(0))
+        bold_attr = ansi(1) if bold else ""
+        return ansi(code) + bold_attr + s + ansi(0)
     return s
 
 
