@@ -14,7 +14,7 @@ import boto3
 import fabric
 from six.moves import range, queue
 
-__version__ = "0.2.13"
+__version__ = "0.2.14"
 
 CHUNK_SIZE = 100
 DEFAULT = {"threads": 10, "timeout": 10}
@@ -50,9 +50,9 @@ def ansi(x):
 
 
 def colored(s, code=0, bold=False):
-    if sys.stdout.isatty():
-        return "{}{}{}{}".format(ansi(code), ansi(1) if bold else "", s, ansi(0))
-    return s
+    if not sys.stdout.isatty() or "NO_COLOR" in os.environ:
+        return s
+    return "{}{}{}{}".format(ansi(code), ansi(1) if bold else "", s, ansi(0))
 
 
 def red(s):
