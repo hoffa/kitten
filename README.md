@@ -1,3 +1,5 @@
+<p align="center"><img alt="Kitten Logo" src="https://i.imgur.com/Rk3Vql3.png" height="150"></p>
+
 # :kissing_cat: kitten
 
 [![Build Status](https://travis-ci.org/hoffa/kitten.svg?branch=master)](https://travis-ci.org/hoffa/kitten) [![Maintainability](https://api.codeclimate.com/v1/badges/34e6b84000b2ab0e1bce/maintainability)](https://codeclimate.com/github/hoffa/kitten/maintainability) [![PyPI - Python Version](https://svgshare.com/i/6tK.svg)](https://pypi.org/project/kitten)
@@ -71,7 +73,3 @@ kitten ip opsworks a283c671-d4c1-4dfa-a7c2-823b7f7b2c2c | xargs kitten get /tmp/
 ```Shell
 kitten ip asg big-prod-asg | xargs kitten put -i ~/.ssh/key.pem cat.jpg /root/cat.jpg root
 ```
-
----
-
-<img alt="Kitten Logo" src="https://i.imgur.com/Rk3Vql3.png" width="50" height="75">
