@@ -56,7 +56,7 @@ $ kitten run uptime ubuntu 18.105.107.20 34.229.135.48
 ```
 
 * Replace `ubuntu` with the user used to log in on the servers.
-* Use `-i` to specify a private key. Unless specified, behavior is similar to [`ssh`](http://man7.org/linux/man-pages/man1/ssh.1.html).
+* Use `-i` to specify a private key. Otherwise, behavior is similar to [`ssh`](http://man7.org/linux/man-pages/man1/ssh.1.html).
 * Commands are always run in parallel. Use `--threads` to specify the maximum number of concurrent connections (defaults to 10).
 * Use `--sudo` to run commands via `sudo`.
 
