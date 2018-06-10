@@ -135,19 +135,24 @@ class Connection(object):
             self.print("ok", color=green)
 
 
+def describe_instances(client, filters):
+    reservations = client.describe_instances(Filters=filters)
+    for reservation in reservations["Reservations"]:
+        for instance in reservation["Instances"]:
+            yield instance
+
+
 def instance_ids_to_ip_addrs(client, instance_ids):
     # Send request in batches to avoid FilterLimitExceeded. Use Filters
     # instead of InstanceIds to avoid exception on non-existent instance ID
     # (e.g. during scale-out or when hastily pasting a bunch of text).
     for chunk in chunks(list(instance_ids), CHUNK_SIZE):
         filters = [{"Name": "instance-id", "Values": chunk}]
-        reservations = client.describe_instances(Filters=filters)
-        for reservation in reservations["Reservations"]:
-            for instance in reservation["Instances"]:
-                yield {
-                    "public": instance.get("PublicIpAddress"),
-                    "private": instance.get("PrivateIpAddress"),
-                }
+        for instance in describe_instances(client, filters):
+            yield {
+                "public": instance.get("PublicIpAddress"),
+                "private": instance.get("PrivateIpAddress"),
+            }
 
 
 def opsworks_layer_ids_to_ip_addrs(client, layer_ids):
