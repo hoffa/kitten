@@ -135,17 +135,19 @@ class Connection(object):
             self.print("ok", color=green)
 
 
-def instance_ids_to_ip_addrs(resource, instance_ids):
+def instance_ids_to_ip_addrs(client, instance_ids):
     # Send request in batches to avoid FilterLimitExceeded. Use Filters
     # instead of InstanceIds to avoid exception on non-existent instance ID
     # (e.g. during scale-out or when hastily pasting a bunch of text).
     for chunk in chunks(list(instance_ids), CHUNK_SIZE):
         filters = [{"Name": "instance-id", "Values": chunk}]
-        for instance in resource.instances.filter(Filters=filters):
-            yield {
-                "public": instance.public_ip_address,
-                "private": instance.private_ip_address,
-            }
+        reservations = client.describe_instances(Filters=filters)
+        for reservation in reservations["Reservations"]:
+            for instance in reservation["Instances"]:
+                yield {
+                    "public": instance.get("PublicIpAddress"),
+                    "private": instance.get("PrivateIpAddress"),
+                }
 
 
 def opsworks_layer_ids_to_ip_addrs(client, layer_ids):
@@ -194,7 +196,7 @@ def get_ip_addrs(values, kind, region_name):
     elif kind == "elb":
         elb = boto3.client("elb", region_name=region_name)
         instance_ids = elbs_to_instance_ids(elb, values)
-    ec2 = boto3.resource("ec2", region_name=region_name)
+    ec2 = boto3.client("ec2", region_name=region_name)
     return instance_ids_to_ip_addrs(ec2, instance_ids)
 
 
