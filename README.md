@@ -1,6 +1,6 @@
 <p align="center"><img alt="Kitten Logo" src="https://i.imgur.com/Rk3Vql3.png" height="150"></p>
 
-# :kissing_cat: kitten
+# 😽 kitten
 
 [![Build Status](https://travis-ci.org/hoffa/kitten.svg?branch=master)](https://travis-ci.org/hoffa/kitten) [![Maintainability](https://api.codeclimate.com/v1/badges/34e6b84000b2ab0e1bce/maintainability)](https://codeclimate.com/github/hoffa/kitten/maintainability) [![PyPI - Python Version](https://svgshare.com/i/6tK.svg)](https://pypi.org/project/kitten)
 
@@ -42,8 +42,8 @@ $ kitten ip asg my-tiny-asg
 24.129.235.48
 ```
 
-* By default only private IP addresses are returned. Use `--public` if you prefer public IPs.
-* You can change region using `--region`.
+- By default only private IP addresses are returned. Use `--public` if you prefer public IPs.
+- You can change region using `--region`.
 
 ### Run command on servers
 
@@ -57,10 +57,10 @@ $ kitten run uptime ubuntu 18.105.107.20 34.229.135.48
 34.229.135.48	17:11:48 up 5 days, 11:19,  0 users,  load average: 6.34, 5.94, 5.72
 ```
 
-* Replace `ubuntu` with the user used to log in on the servers.
-* Use `-i` to specify a private key. Otherwise, behavior is similar to [`ssh`](http://man7.org/linux/man-pages/man1/ssh.1.html).
-* Commands are always run in parallel. Use `--threads` to specify the maximum number of concurrent connections (defaults to 10).
-* Use `--sudo` to run commands via `sudo`.
+- Replace `ubuntu` with the user used to log in on the servers.
+- Use `-i` to specify a private key. Otherwise, behavior is similar to [`ssh`](http://man7.org/linux/man-pages/man1/ssh.1.html).
+- Commands are always run in parallel. Use `--threads` to specify the maximum number of concurrent connections (defaults to 10).
+- Use `--sudo` to run commands via `sudo`.
 
 Just pipe `kitten ip` to [`xargs`](http://man7.org/linux/man-pages/man1/xargs.1.html) to do everything in one step.
 
