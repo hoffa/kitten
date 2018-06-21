@@ -47,6 +47,8 @@ $ kitten ip asg my-tiny-asg
 
 ### Run command on servers
 
+Use `kitten run`:
+
 ```Shell
 $ kitten run uptime ubuntu 18.105.107.20 34.229.135.48
 18.105.107.20	run	uptime
@@ -62,13 +64,17 @@ $ kitten run uptime ubuntu 18.105.107.20 34.229.135.48
 
 Just pipe `kitten ip` to [`xargs`](http://man7.org/linux/man-pages/man1/xargs.1.html) to do everything in one step.
 
-### Download files
+### Download files from servers
+
+Use `kitten get`:
 
 ```Shell
 kitten ip opsworks a283c671-d4c1-4dfa-a7c2-823b7f7b2c2c | xargs kitten get /tmp/system.log ubuntu
 ```
 
-### Upload file
+### Upload file to servers
+
+Use `kitten put`:
 
 ```Shell
 kitten ip asg big-prod-asg | xargs kitten put -i ~/.ssh/key.pem cat.jpg /root/cat.jpg root
