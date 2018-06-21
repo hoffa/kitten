@@ -45,10 +45,10 @@ $ kitten ip asg my-tiny-asg
 - By default only private IP addresses are returned. Use `--public` if you prefer public IPs.
 - You can change region using `--region`.
 
-`kitten ip id` also works with any text that contains instance IDs:
+If you're in a hurry, you just paste any text that contains instance IDs:
 
 ```Shell
-$ kitten ip id 	prod-mongo-0901bc21990809ed4-eu	my-hostname-06a0fc734534ef6d9
+$ kitten ip id prod-mongo-0901bc21990809ed4-eu my-hostname-06a0fc734534ef6d9
 17.136.127.18
 23.119.136.38
 ```
