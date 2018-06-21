@@ -6,6 +6,7 @@ import argparse
 import functools
 import logging
 import os
+import re
 import signal
 import sys
 import threading
@@ -14,7 +15,7 @@ import boto3
 import fabric
 from six.moves import range, queue
 
-__version__ = "0.2.14"
+__version__ = "0.2.15"
 
 CHUNK_SIZE = 100
 DEFAULT = {"threads": 10, "timeout": 10}
@@ -135,6 +136,12 @@ class Connection(object):
             self.print("ok", color=green)
 
 
+def find_instance_ids(l):
+    for s in l:
+        for match in re.findall(r"[\da-f]{17}|[\da-f]{8}", s):
+            yield "i-" + match
+
+
 def describe_instances(client, filters):
     reservations = client.describe_instances(Filters=filters)
     for reservation in reservations["Reservations"]:
@@ -194,7 +201,7 @@ def get_ip_addrs(values, kind, region_name):
         opsworks = boto3.client("opsworks", region_name=region_name)
         return opsworks_layer_ids_to_ip_addrs(opsworks, values)
     elif kind == "id":
-        instance_ids = values
+        instance_ids = find_instance_ids(values)
     elif kind == "asg":
         autoscaling = boto3.client("autoscaling", region_name=region_name)
         instance_ids = asgs_to_instance_ids(autoscaling, values)
