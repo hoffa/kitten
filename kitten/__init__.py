@@ -28,7 +28,6 @@ HELP = {
     "public": "print public IP addresses if possible",
     "region": "AWS region name",
     "remote": "path to remote file",
-    "sudo": "run command via sudo",
     "threads": "number of concurrent connections (default: {})".format(
         DEFAULT["threads"]
     ),
@@ -98,12 +97,11 @@ class Connection(object):
         for line in s.splitlines():
             log.info(self.color(self.host) + "\t" + color(line))
 
-    def run(self, command, sudo):
-        self.print("{}\t{}".format(yellow("sudo" if sudo else "run"), command))
+    def run(self, command):
+        self.print("{}\t{}".format(yellow("run"), command))
         try:
             with self.conn as c:
-                func = c.sudo if sudo else c.run
-                result = func(command, pty=True, hide=True, warn=True, in_stream=False)
+                result = c.run(command, pty=True, hide=True, warn=True, in_stream=False)
         except Exception as e:
             self.print(str(e), color=red)
         else:
@@ -227,7 +225,7 @@ def get_conns(args):
 def get_tasks(args):
     conns = get_conns(args)
     if args.tool == "run":
-        return [functools.partial(conn.run, args.command, args.sudo) for conn in conns]
+        return [functools.partial(conn.run, args.command) for conn in conns]
     elif args.tool == "get":
         return [functools.partial(conn.get, args.remote) for conn in conns]
     elif args.tool == "put":
@@ -277,7 +275,6 @@ def parse_args():
     run_parser.add_argument(
         "--threads", type=int, default=DEFAULT["threads"], help=HELP["threads"]
     )
-    run_parser.add_argument("--sudo", action="store_true", help=HELP["sudo"])
     run_parser.add_argument("command", help=HELP["command"])
     run_parser.add_argument("user", help=HELP["user"])
     run_parser.add_argument("hosts", nargs="+", help=HELP["hosts"])
