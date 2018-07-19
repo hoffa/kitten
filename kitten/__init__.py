@@ -119,7 +119,7 @@ class Connection(object):
             self.print("ok", color=green)
 
     def get(self, remote):
-        local = self.host + "/" + os.path.basename(remote)
+        local = os.path.join(self.host, os.path.basename(remote))
         self.print("{}\t{}\t{}".format(yellow("get"), remote, local))
         try:
             os.mkdir(self.host)
