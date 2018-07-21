@@ -16,7 +16,7 @@ setuptools.setup(
     entry_points={"console_scripts": {"kitten=kitten:main"}},
     setup_requires=["pytest-runner"],
     tests_require=["pytest"],
-    install_requires=["boto3>=1.7", "fabric>=2.1", "six>=1.0"],
+    install_requires=["boto3>=1.7", "fabric>=2.2", "six>=1.0"],
     license="MIT",
     classifiers=(
         "Development Status :: 4 - Beta",
