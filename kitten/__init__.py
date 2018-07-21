@@ -15,7 +15,7 @@ import boto3
 import fabric
 from six.moves import range, queue
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 CHUNK_SIZE = 50
 DEFAULT = {"threads": 10, "timeout": 10}
