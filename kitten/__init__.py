@@ -327,8 +327,8 @@ def main():
             num_workers = min(args.threads, len(args.hosts))
             run_workers(num_workers)
         except KeyboardInterrupt:
-            log.info(red("terminating"))
             stop.set()
+            log.info(red("terminating"))
 
 
 if __name__ == "__main__":
