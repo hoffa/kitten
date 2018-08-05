@@ -5,7 +5,7 @@ with open("README.md") as f:
 
 setuptools.setup(
     name="kitten",
-    version="0.3.1",
+    version="0.3.2",
     author="Chris Rehn",
     author_email="chris@rehn.me",
     description="Tiny multi-server automation tool.",
