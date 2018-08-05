@@ -82,5 +82,5 @@ kitten ip opsworks a283c671-d4c1-4dfa-a7c2-823b7f7b2c2c | xargs kitten get /tmp/
 Use `kitten put`:
 
 ```Shell
-kitten ip asg big-prod-asg | xargs kitten put -i ~/.ssh/key.pem cat.jpg /root/cat.jpg root
+kitten ip asg big-prod-asg | xargs kitten put -i ~/.ssh/key.pem cat.jpg /tmp root
 ```
