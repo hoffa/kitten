@@ -5,7 +5,7 @@ with open("README.md") as f:
 
 setuptools.setup(
     name="kitten",
-    version="0.3.4",
+    version="0.4.0",
     author="Chris Rehn",
     author_email="chris@rehn.me",
     description="Tiny multi-server automation tool.",
@@ -16,7 +16,7 @@ setuptools.setup(
     entry_points={"console_scripts": {"kitten=kitten:main"}},
     setup_requires=["pytest-runner"],
     tests_require=["pytest"],
-    install_requires=["boto3>=1.9", "fabric>=2.4", "six>=1.0"],
+    install_requires=["boto3>=1.9", "fabric>=2.4"],
     license="MIT",
     classifiers=(
         "Development Status :: 4 - Beta",
