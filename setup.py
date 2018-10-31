@@ -14,8 +14,6 @@ setuptools.setup(
     url="https://github.com/hoffa/kitten",
     packages=setuptools.find_packages(),
     entry_points={"console_scripts": {"kitten=kitten:main"}},
-    setup_requires=["pytest-runner"],
-    tests_require=["pytest"],
     install_requires=["boto3>=1.9", "fabric>=2.4"],
     license="MIT",
     classifiers=(
