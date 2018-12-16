@@ -47,6 +47,14 @@ log.addHandler(logging.StreamHandler(sys.stdout))
 
 tasks = queue.Queue()
 stop = threading.Event()
+num_failed = 0
+lock = threading.Lock()
+
+
+def inc_failed():
+    global num_failed
+    with lock:
+        num_failed += 1
 
 
 def ansi(x):
@@ -79,10 +87,6 @@ def chunks(l, n):
 
 
 class Connection(object):
-    """
-    Encapsulates an SSH connection.
-    """
-
     def __init__(self, host, user, timeout, key_filename, color):
         self.host = host
         self.color = color
@@ -108,9 +112,13 @@ class Connection(object):
                 result = c.run(command, pty=True, hide=True, warn=True, in_stream=False)
         except Exception as e:
             self.print(str(e), color=red)
+            inc_failed()
         else:
-            color = colored if result.ok else red
-            self.print(result.stdout, color=color)
+            if result.ok:
+                self.print(result.stdout)
+            else:
+                self.print(result.stdout, color=red)
+                inc_failed()
 
     def put(self, local, remote):
         self.print("{}\t{}\t{}".format(yellow("put"), local, remote))
@@ -119,6 +127,7 @@ class Connection(object):
                 c.put(local, remote=remote)
         except Exception as e:
             self.print(str(e), color=red)
+            inc_failed()
         else:
             self.print("ok", color=green)
 
@@ -134,6 +143,7 @@ class Connection(object):
                 c.get(remote, local=local)
         except Exception as e:
             self.print(str(e), color=red)
+            inc_failed()
         else:
             self.print("ok", color=green)
 
@@ -333,7 +343,9 @@ def main():
         except KeyboardInterrupt:
             stop.set()
             log.info(red("terminating"))
+    with lock:
+        return num_failed
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
