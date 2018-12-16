@@ -47,14 +47,14 @@ log.addHandler(logging.StreamHandler(sys.stdout))
 
 tasks = queue.Queue()
 stop = threading.Event()
-num_failed = 0
+num_success = 0
 lock = threading.Lock()
 
 
-def inc_failed():
-    global num_failed
+def inc_success():
+    global num_success
     with lock:
-        num_failed += 1
+        num_success += 1
 
 
 def ansi(x):
@@ -112,13 +112,12 @@ class Connection(object):
                 result = c.run(command, pty=True, hide=True, warn=True, in_stream=False)
         except Exception as e:
             self.print(str(e), color=red)
-            inc_failed()
         else:
             if result.ok:
                 self.print(result.stdout)
+                inc_success()
             else:
                 self.print(result.stdout, color=red)
-                inc_failed()
 
     def put(self, local, remote):
         self.print("{}\t{}\t{}".format(yellow("put"), local, remote))
@@ -127,9 +126,9 @@ class Connection(object):
                 c.put(local, remote=remote)
         except Exception as e:
             self.print(str(e), color=red)
-            inc_failed()
         else:
             self.print("ok", color=green)
+            inc_success()
 
     def get(self, remote):
         local = os.path.join(self.host, os.path.basename(remote))
@@ -143,9 +142,9 @@ class Connection(object):
                 c.get(remote, local=local)
         except Exception as e:
             self.print(str(e), color=red)
-            inc_failed()
         else:
             self.print("ok", color=green)
+            inc_success()
 
 
 def find_instance_ids(l):
@@ -344,7 +343,7 @@ def main():
             stop.set()
             log.info(red("terminating"))
     with lock:
-        return num_failed
+        return len(args.hosts) - num_success
 
 
 if __name__ == "__main__":
