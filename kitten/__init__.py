@@ -232,7 +232,10 @@ def get_colors():
 def get_conns(args):
     colors = list(get_colors())
     for i, host in enumerate(args.hosts):
-        yield Connection(host, args.user, args.timeout, args.i, colors[i % len(colors)])
+        if host:
+            yield Connection(
+                host, args.user, args.timeout, args.i, colors[i % len(colors)]
+            )
 
 
 def get_tasks(args):
