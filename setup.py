@@ -5,7 +5,7 @@ with open("README.md") as f:
 
 setuptools.setup(
     name="kitten",
-    version="0.4.1",
+    version="0.5.0",
     author="Chris Rehn",
     author_email="chris@rehn.me",
     description="Tiny multi-server automation tool.",
@@ -17,7 +17,7 @@ setuptools.setup(
     install_requires=["boto3>=1.9", "fabric>=2.4"],
     license="MIT",
     classifiers=(
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Environment :: Console",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",

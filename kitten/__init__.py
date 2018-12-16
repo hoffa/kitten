@@ -19,7 +19,7 @@ try:
 except ImportError:
     import Queue as queue
 
-__version__ = "0.4.1"
+__version__ = "0.5.0"
 
 CHUNK_SIZE = 50
 DEFAULT = {"threads": 10, "timeout": 10}
