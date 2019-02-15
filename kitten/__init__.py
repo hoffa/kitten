@@ -320,12 +320,7 @@ def parse_args():
     put_parser.add_argument("user", help=HELP["user"])
     put_parser.add_argument("hosts", nargs="+", help=HELP["hosts"])
 
-    args = parser.parse_args()
-    if not args.tool:
-        parser.print_help()
-        sys.exit(2)
-
-    return args
+    return parser.parse_args()
 
 
 def main():
