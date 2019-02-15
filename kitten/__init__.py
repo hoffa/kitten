@@ -32,10 +32,8 @@ HELP = {
     "public": "print public IP addresses if possible",
     "region": "AWS region name",
     "remote": "path to remote file",
-    "threads": "number of concurrent connections (default: {})".format(
-        DEFAULT["threads"]
-    ),
-    "timeout": "connection timeout in seconds (default: {})".format(DEFAULT["timeout"]),
+    "threads": "number of concurrent connections",
+    "timeout": "connection timeout in seconds",
     "user": "remote connection user",
     "values": "list of instance IDs or resource names",
     "verbose": "show more output",
@@ -275,7 +273,9 @@ def parse_args():
     parser.add_argument("--verbose", action="store_true", help=HELP["verbose"])
     subparsers = parser.add_subparsers(dest="tool")
 
-    aws_parser = subparsers.add_parser("ip")
+    aws_parser = subparsers.add_parser(
+        "ip", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     aws_parser.add_argument("--region", help=HELP["region"])
     aws_parser.add_argument("--public", action="store_true", help=HELP["public"])
     aws_parser.add_argument(
@@ -283,7 +283,9 @@ def parse_args():
     )
     aws_parser.add_argument("values", nargs="+", help=HELP["values"])
 
-    run_parser = subparsers.add_parser("run")
+    run_parser = subparsers.add_parser(
+        "run", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     run_parser.add_argument("-i", help=HELP["i"])
     run_parser.add_argument(
         "--timeout", type=float, default=DEFAULT["timeout"], help=HELP["timeout"]
@@ -295,7 +297,9 @@ def parse_args():
     run_parser.add_argument("user", help=HELP["user"])
     run_parser.add_argument("hosts", nargs="+", help=HELP["hosts"])
 
-    get_parser = subparsers.add_parser("get")
+    get_parser = subparsers.add_parser(
+        "get", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     get_parser.add_argument("-i", help=HELP["i"])
     get_parser.add_argument(
         "--timeout", type=float, default=DEFAULT["timeout"], help=HELP["timeout"]
@@ -307,7 +311,9 @@ def parse_args():
     get_parser.add_argument("user", help=HELP["user"])
     get_parser.add_argument("hosts", nargs="+", help=HELP["hosts"])
 
-    put_parser = subparsers.add_parser("put")
+    put_parser = subparsers.add_parser(
+        "put", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     put_parser.add_argument("-i", help=HELP["i"])
     put_parser.add_argument(
         "--timeout", type=float, default=DEFAULT["timeout"], help=HELP["timeout"]
