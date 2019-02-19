@@ -1,4 +1,4 @@
-# 😽 kitten
+# kitten
 
 [![Build Status](https://img.shields.io/travis/hoffa/kitten.svg?style=flat-square)](https://travis-ci.org/hoffa/kitten) [![Maintainability](https://img.shields.io/codeclimate/maintainability/hoffa/kitten.svg?style=flat-square)](https://codeclimate.com/github/hoffa/kitten/maintainability) [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/kitten.svg?style=flat-square)](https://pypi.org/project/kitten) [![PyPI](https://img.shields.io/pypi/v/kitten.svg?style=flat-square)](https://pypi.org/project/kitten)
 
