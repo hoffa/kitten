@@ -1,6 +1,9 @@
 # kitten
 
-[![Build Status](https://img.shields.io/travis/hoffa/kitten.svg?style=flat-square)](https://travis-ci.org/hoffa/kitten) [![Maintainability](https://img.shields.io/codeclimate/maintainability/hoffa/kitten.svg?style=flat-square)](https://codeclimate.com/github/hoffa/kitten/maintainability) [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/kitten.svg?style=flat-square)](https://pypi.org/project/kitten) [![PyPI](https://img.shields.io/pypi/v/kitten.svg?style=flat-square)](https://pypi.org/project/kitten)
+[![Build Status](https://img.shields.io/travis/hoffa/kitten.svg)](https://travis-ci.org/hoffa/kitten)
+[![Maintainability](https://img.shields.io/codeclimate/maintainability/hoffa/kitten.svg)](https://codeclimate.com/github/hoffa/kitten/maintainability)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/kitten.svg)](https://pypi.org/project/kitten)
+[![PyPI](https://img.shields.io/pypi/v/kitten.svg)](https://pypi.org/project/kitten)
 
 Tiny multi-server automation tool.
 
@@ -10,7 +13,7 @@ Designed to be as simple as possible and play nice with Unix tools.
 
 ## Install
 
-```Shell
+```shell
 pip install kitten
 ```
 
@@ -18,13 +21,13 @@ pip install kitten
 
 `kitten` can get IP addresses from AWS resources for you. For that you'll need to have your AWS credentials set up. You can do that using `awscli`:
 
-```Shell
+```shell
 pip install awscli
 ```
 
 Then:
 
-```Shell
+```shell
 aws configure
 ```
 
@@ -34,7 +37,7 @@ aws configure
 
 Use `kitten run`:
 
-```bash
+```shell
 $ kitten run uptime ubuntu 18.105.107.20 34.229.135.48
 18.105.107.20	run	uptime
 34.229.135.48	run	uptime
@@ -50,7 +53,7 @@ $ kitten run uptime ubuntu 18.105.107.20 34.229.135.48
 
 Use `kitten ip` with either `id`, `asg`, `elb` or `opsworks`:
 
-```Shell
+```shell
 $ kitten ip asg my-tiny-asg
 18.135.117.17
 24.129.235.48
@@ -61,7 +64,7 @@ $ kitten ip asg my-tiny-asg
 
 If you're in a hurry, you can just paste any text that contains instance IDs:
 
-```Shell
+```shell
 $ kitten ip id prod-mongo-0901bc21990109ed4-eu my-hostname-06a2fc734534ef6d9
 17.136.127.18
 23.119.136.38
@@ -71,7 +74,7 @@ $ kitten ip id prod-mongo-0901bc21990109ed4-eu my-hostname-06a2fc734534ef6d9
 
 Use `kitten get`:
 
-```Shell
+```shell
 kitten ip opsworks a283c671-d4c1-4dfa-a7c2-823b7f7b2c2c | xargs kitten get /tmp/system.log ubuntu
 ```
 
@@ -79,6 +82,6 @@ kitten ip opsworks a283c671-d4c1-4dfa-a7c2-823b7f7b2c2c | xargs kitten get /tmp/
 
 Use `kitten put`:
 
-```Shell
+```shell
 kitten ip asg big-prod-asg | xargs kitten put -i ~/.ssh/key.pem cat.jpg /tmp ubuntu
 ```
