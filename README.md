@@ -45,9 +45,9 @@ $ kitten run uptime ubuntu 18.105.107.20 34.229.135.48
 34.229.135.48	17:11:48 up 5 days, 11:19,  0 users,  load average: 6.34, 5.94, 5.72
 ```
 
-- Replace `ubuntu` with the user used to log in on the servers.
-- Use `-i` to specify a private key. Otherwise, behavior is similar to [`ssh`](http://man7.org/linux/man-pages/man1/ssh.1.html).
-- Use `--threads` to specify the number of concurrent connections (defaults to 10).
+- Replace `ubuntu` with the user used to log in on the servers
+- Use `-i` to specify a private key. Otherwise, behavior is similar to [`ssh`](http://man7.org/linux/man-pages/man1/ssh.1.html)
+- Use `--threads` to specify the number of concurrent connections (defaults to 10)
 
 ### Get IP addresses from AWS resources
 
@@ -59,8 +59,8 @@ $ kitten ip asg my-tiny-asg
 24.129.235.48
 ```
 
-- By default only private IP addresses are returned. Use `--public` if you prefer public IPs.
-- You can change region using `--region`.
+- By default only private IP addresses are returned. Use `--public` if you prefer public IPs
+- You can change region using `--region`
 
 If you're in a hurry, you can just paste any text that contains instance IDs:
 
