@@ -1,6 +1,6 @@
 import setuptools
 
-with open("README.md") as f:
+with open("README.rst") as f:
     long_description = f.read()
 
 setuptools.setup(
@@ -10,7 +10,6 @@ setuptools.setup(
     author_email="chris@rehn.me",
     description="Tiny multi-server automation tool.",
     long_description=long_description,
-    long_description_content_type="text/markdown",
     url="https://github.com/hoffa/kitten",
     packages=setuptools.find_packages(),
     entry_points={"console_scripts": {"kitten=kitten:main"}},
