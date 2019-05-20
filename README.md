@@ -2,7 +2,6 @@
 
 [![Build Status](https://img.shields.io/travis/hoffa/kitten.svg)](https://travis-ci.org/hoffa/kitten)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/kitten.svg)](https://pypi.org/project/kitten)
-[![PyPI](https://img.shields.io/pypi/v/kitten.svg)](https://pypi.org/project/kitten)
 
 Tiny multi-server automation tool.
 
