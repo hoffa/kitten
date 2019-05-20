@@ -6,9 +6,7 @@ kitten |travis|
 
 Tiny muli-server automation tool.
 
-Designed to be as simple as possible and play nice with Unix tools.
-
-.. image:: https://i.imgur.com/QEQfOiv.png
+Run command on multiple servers. Designed to be as simple as possible and play nice with Unix tools.
 
 Installation
 ------------
