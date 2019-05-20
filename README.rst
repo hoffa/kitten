@@ -50,7 +50,7 @@ Use ``kitten run``:
   34.229.135.48	17:11:48 up 5 days, 11:19,  0 users,  load average: 6.34, 5.94, 5.72
 
 - Replace `ubuntu` with the user used to log in on the servers
-- Use `-i` to specify a private key. Otherwise, behavior is similar to [`ssh`](http://man7.org/linux/man-pages/man1/ssh.1.html)
+- Use `-i` to specify a private key
 - Use `--threads` to specify the number of concurrent connections (defaults to 10)
 
 Get IP addresses from AWS resources
