@@ -19,7 +19,7 @@ try:
 except ImportError:
     import Queue as queue
 
-__version__ = "0.5.0"
+__version__ = "0.5.2"
 
 CHUNK_SIZE = 50
 DEFAULT = {"threads": 10, "timeout": 10}
@@ -27,15 +27,15 @@ HELP = {
     "command": "shell command to execute",
     "hosts": "list of IP addresses",
     "i": "private key path",
-    "kind": "AWS resource type",
+    "kind": "AWS resource type (id: instance ID, asg: Auto Scaling Group name, elb: Elastic Load Balancer name, opsworks: OpsWorks layer ID)",
     "local": "path to local file",
-    "public": "print public IP addresses if possible",
+    "public": "prefer public IP addresses",
     "region": "AWS region name",
     "remote": "path to remote file",
     "threads": "number of concurrent connections",
     "timeout": "connection timeout in seconds",
-    "user": "remote connection user",
-    "values": "list of instance IDs or resource names",
+    "user": "remote server user",
+    "values": "list of resource identifiers",
     "verbose": "show more output",
 }
 

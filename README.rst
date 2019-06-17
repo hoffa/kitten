@@ -4,7 +4,7 @@ kitten |travis|
 .. |travis| image:: https://travis-ci.org/hoffa/kitten.svg?branch=master
    :target: https://travis-ci.org/hoffa/kitten
 
-Tiny muli-server automation tool.
+Tiny multi-server automation tool.
 
 Run command on multiple servers. Designed to be as simple as possible and play nice with Unix tools.
 
