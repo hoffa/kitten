@@ -9,5 +9,5 @@ install:
   - pip install .
 script:
   - kitten --version
-  - flake8 --ignore E203 --max-line-length 88
+  - flake8 --ignore E203,E501
   - python setup.py check --metadata --strict
