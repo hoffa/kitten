@@ -29,7 +29,6 @@ setuptools.setup(
         "Programming Language :: Python :: 3.7",
         "Topic :: System :: Installation/Setup",
         "Topic :: System :: Monitoring",
-        "Topic :: System :: Shells",
         "Topic :: System :: Systems Administration",
         "Topic :: Utilities",
     ),
