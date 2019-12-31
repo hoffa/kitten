@@ -14,6 +14,8 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     entry_points={"console_scripts": {"kitten=kitten:main"}},
     install_requires=["boto3>=1.9", "fabric>=2.4"],
+    setup_requires=["pytest-runner"],
+    tests_require=["pytest"],
     license="MIT",
     classifiers=(
         "Development Status :: 5 - Production/Stable",
