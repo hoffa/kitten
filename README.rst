@@ -1,8 +1,8 @@
 kitten |travis|
 ===============
 
-.. |travis| image:: https://travis-ci.org/hoffa/kitten.svg?branch=master
-   :target: https://travis-ci.org/hoffa/kitten
+.. |travis| image:: https://github.com/hoffa/kitten/workflows/.github/workflows/workflow.yml/badge.svg
+   :target: https://github.com/hoffa/kitten/actions
 
 Tiny multi-server automation tool.
 
