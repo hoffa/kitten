@@ -27,7 +27,7 @@ HELP = {
     "command": "shell command to execute",
     "hosts": "list of IP addresses",
     "i": "private key path",
-    "kind": "AWS resource type (id: instance ID, asg: Auto Scaling Group name, elb: Elastic Load Balancer name, opsworks: OpsWorks layer ID)",
+    "kind": "AWS resource type (id: instance ID, asg: Auto Scaling Group name, elb: Elastic Load Balancer name)",
     "local": "path to local file",
     "public": "prefer public IP addresses",
     "region": "AWS region name",
@@ -171,16 +171,6 @@ def instance_ids_to_ip_addrs(client, instance_ids):
             }
 
 
-def opsworks_layer_ids_to_ip_addrs(client, layer_ids):
-    for layer_id in layer_ids:
-        instances = client.describe_instances(LayerId=layer_id)
-        for instance in instances["Instances"]:
-            yield {
-                "public": instance.get("PublicIp"),
-                "private": instance.get("PrivateIp"),
-            }
-
-
 def asgs_to_instance_ids(client, asg_names):
     asgs = client.describe_auto_scaling_groups(AutoScalingGroupNames=asg_names)
     for asg in asgs["AutoScalingGroups"]:
@@ -206,10 +196,7 @@ def print_ip_addrs(ip_addrs, public):
 
 
 def get_ip_addrs(values, kind, region_name):
-    if kind == "opsworks":
-        opsworks = boto3.client("opsworks", region_name=region_name)
-        return opsworks_layer_ids_to_ip_addrs(opsworks, values)
-    elif kind == "id":
+    if kind == "id":
         instance_ids = find_instance_ids(values)
     elif kind == "asg":
         autoscaling = boto3.client("autoscaling", region_name=region_name)
@@ -278,9 +265,7 @@ def parse_args():
     )
     aws_parser.add_argument("--region", help=HELP["region"])
     aws_parser.add_argument("--public", action="store_true", help=HELP["public"])
-    aws_parser.add_argument(
-        "kind", choices=("id", "asg", "elb", "opsworks"), help=HELP["kind"]
-    )
+    aws_parser.add_argument("kind", choices=("id", "asg", "elb"), help=HELP["kind"])
     aws_parser.add_argument("values", nargs="+", help=HELP["values"])
 
     run_parser = subparsers.add_parser(

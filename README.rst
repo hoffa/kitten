@@ -56,7 +56,7 @@ Use ``kitten run``:
 Get IP addresses from AWS resources
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Use ``kitten ip`` with either ``id``, ``asg``, ``elb`` or ``opsworks``:
+Use ``kitten ip`` with either ``id``, ``asg`` or ``elb``:
 
 ::
 
@@ -82,7 +82,7 @@ Use ``kitten get``:
 
 ::
 
-  kitten ip opsworks a283c671-d4c1-4dfa-a7c2-823b7f7b2c2c | xargs kitten get /tmp/system.log ubuntu
+  kitten ip elb my-load-balancer | xargs kitten get /tmp/system.log ubuntu
 
 Upload file to servers
 ~~~~~~~~~~~~~~~~~~~~~~
