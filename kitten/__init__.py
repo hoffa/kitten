@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 
-from __future__ import absolute_import, print_function, unicode_literals
-
 import argparse
 import functools
 import logging
 import os
+import queue
 import re
 import signal
 import sys
@@ -13,11 +12,6 @@ import threading
 
 import boto3
 import fabric
-
-try:
-    import queue
-except ImportError:
-    import Queue as queue
 
 __version__ = "0.5.2"
 
