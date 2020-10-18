@@ -79,9 +79,9 @@ def yellow(s):
     return colored(s, code=33)
 
 
-def chunks(l, n):
-    for i in range(0, len(l), n):
-        yield l[i : i + n]
+def chunks(L, n):
+    for i in range(0, len(L), n):
+        yield L[i : i + n]
 
 
 class Connection(object):
@@ -145,8 +145,8 @@ class Connection(object):
             inc_success()
 
 
-def find_instance_ids(l):
-    for s in l:
+def find_instance_ids(L):
+    for s in L:
         for match in re.findall(r"[\da-f]{17}|[\da-f]{8}", s):
             yield "i-" + match
 
