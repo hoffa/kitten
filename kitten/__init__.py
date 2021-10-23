@@ -9,9 +9,26 @@ import re
 import signal
 import sys
 import threading
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    TypeVar,
+    Union,
+)
 
-import boto3
-import fabric
+import boto3  # type: ignore
+import fabric  # type: ignore
+
+T = TypeVar("T")
+ColorFunc = Callable[[str], str]
+TaskFunc = Callable[[], None]
+Ip = Dict[str, Optional[str]]
+Filters = List[Dict[str, Union[str, List[str]]]]
 
 __version__ = "0.6.1"
 
@@ -37,23 +54,23 @@ log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
 log.addHandler(logging.StreamHandler(sys.stdout))
 
-tasks = queue.Queue()
+tasks: queue.Queue[TaskFunc] = queue.Queue()
 stop = threading.Event()
 num_success = 0
 lock = threading.Lock()
 
 
-def inc_success():
+def inc_success() -> None:
     global num_success
     with lock:
         num_success += 1
 
 
-def ansi(x):
+def ansi(x: int) -> str:
     return "\033[{}m".format(x)
 
 
-def colored(s, code=0, bold=False):
+def colored(s: str, code: int = 0, bold: bool = False) -> str:
     has_attr = code > 0 or bold
     if has_attr and sys.stdout.isatty() and "NO_COLOR" not in os.environ:
         bold_attr = ansi(1) if bold else ""
@@ -61,25 +78,27 @@ def colored(s, code=0, bold=False):
     return s
 
 
-def red(s):
+def red(s: str) -> str:
     return colored(s, code=31)
 
 
-def green(s):
+def green(s: str) -> str:
     return colored(s, code=32)
 
 
-def yellow(s):
+def yellow(s: str) -> str:
     return colored(s, code=33)
 
 
-def chunks(L, n):
+def chunks(L: List[T], n: int) -> Iterator[List[T]]:
     for i in range(0, len(L), n):
         yield L[i : i + n]
 
 
 class Connection(object):
-    def __init__(self, host, user, timeout, key_filename, color):
+    def __init__(
+        self, host: str, user: str, timeout: int, key_filename: str, color: ColorFunc
+    ) -> None:
         self.host = host
         self.color = color
         self.conn = fabric.Connection(
@@ -93,11 +112,11 @@ class Connection(object):
             },
         )
 
-    def print(self, s, color=colored):
+    def print(self, s: str, color: ColorFunc = colored) -> None:
         for line in s.splitlines():
             log.info(self.color(self.host) + "\t" + color(line))
 
-    def run(self, command):
+    def run(self, command: str) -> None:
         self.print("{}\t{}".format(yellow("run"), command))
         try:
             with self.conn as c:
@@ -111,7 +130,7 @@ class Connection(object):
             else:
                 self.print(result.stdout, color=red)
 
-    def put(self, local, remote):
+    def put(self, local: str, remote: str) -> None:
         self.print("{}\t{}\t{}".format(yellow("put"), local, remote))
         try:
             with self.conn as c:
@@ -122,7 +141,7 @@ class Connection(object):
             self.print("ok", color=green)
             inc_success()
 
-    def get(self, remote):
+    def get(self, remote: str) -> None:
         local = os.path.join(self.host, os.path.basename(remote))
         self.print("{}\t{}\t{}".format(yellow("get"), remote, local))
         try:
@@ -139,25 +158,25 @@ class Connection(object):
             inc_success()
 
 
-def find_instance_ids(L):
+def find_instance_ids(L: List[str]) -> Iterator[str]:
     for s in L:
         for match in re.findall(r"[\da-f]{17}|[\da-f]{8}", s):
             yield "i-" + match
 
 
-def describe_instances(client, filters):
+def describe_instances(client: Any, filters: Filters) -> Iterator[Dict[str, str]]:
     reservations = client.describe_instances(Filters=filters)
     for reservation in reservations["Reservations"]:
         for instance in reservation["Instances"]:
             yield instance
 
 
-def instance_ids_to_ip_addrs(client, instance_ids):
+def instance_ids_to_ip_addrs(client: Any, instance_ids: Iterable[str]) -> Iterator[Ip]:
     # Send request in batches to avoid FilterLimitExceeded. Use Filters
     # instead of InstanceIds to avoid exception on non-existent instance ID
     # (e.g. during scale-out or when hastily pasting a bunch of text).
     for chunk in chunks(list(instance_ids), CHUNK_SIZE):
-        filters = [{"Name": "instance-id", "Values": chunk}]
+        filters: Filters = [{"Name": "instance-id", "Values": chunk}]
         for instance in describe_instances(client, filters):
             yield {
                 "public": instance.get("PublicIpAddress"),
@@ -165,21 +184,21 @@ def instance_ids_to_ip_addrs(client, instance_ids):
             }
 
 
-def asgs_to_instance_ids(client, asg_names):
+def asgs_to_instance_ids(client: Any, asg_names: List[str]) -> Iterator[str]:
     asgs = client.describe_auto_scaling_groups(AutoScalingGroupNames=asg_names)
     for asg in asgs["AutoScalingGroups"]:
         for instance in asg["Instances"]:
             yield instance["InstanceId"]
 
 
-def elbs_to_instance_ids(client, elb_names):
+def elbs_to_instance_ids(client: Any, elb_names: List[str]) -> Iterator[str]:
     elbs = client.describe_load_balancers(LoadBalancerNames=elb_names)
     for elb in elbs["LoadBalancerDescriptions"]:
         for instance in elb["Instances"]:
             yield instance["InstanceId"]
 
 
-def print_ip_addrs(ip_addrs, public):
+def print_ip_addrs(ip_addrs: Iterable[Ip], public: bool) -> None:
     for ip_addr in ip_addrs:
         public_ip = ip_addr["public"]
         private_ip = ip_addr["private"]
@@ -189,7 +208,7 @@ def print_ip_addrs(ip_addrs, public):
             log.info(private_ip)
 
 
-def get_ip_addrs(values, kind, region_name):
+def get_ip_addrs(values: List[str], kind: str, region_name: str) -> Iterator[Ip]:
     if kind == "id":
         instance_ids = find_instance_ids(values)
     elif kind == "asg":
@@ -202,13 +221,13 @@ def get_ip_addrs(values, kind, region_name):
     return instance_ids_to_ip_addrs(ec2, instance_ids)
 
 
-def get_colors():
+def get_colors() -> Iterator[ColorFunc]:
     for bold in (False, True):
         for code in range(31, 37):
             yield functools.partial(colored, code=code, bold=bold)
 
 
-def get_conns(args):
+def get_conns(args: argparse.Namespace) -> Iterator[Connection]:
     colors = list(get_colors())
     for i, host in enumerate(args.hosts):
         if host:
@@ -217,7 +236,7 @@ def get_conns(args):
             )
 
 
-def get_tasks(args):
+def get_tasks(args: argparse.Namespace) -> List[TaskFunc]:
     conns = get_conns(args)
     if args.tool == "run":
         return [functools.partial(conn.run, args.command) for conn in conns]
@@ -225,9 +244,10 @@ def get_tasks(args):
         return [functools.partial(conn.get, args.remote) for conn in conns]
     elif args.tool == "put":
         return [functools.partial(conn.put, args.local, args.remote) for conn in conns]
+    return []
 
 
-def worker():
+def worker() -> None:
     while not stop.is_set():
         try:
             task = tasks.get_nowait()
@@ -237,7 +257,7 @@ def worker():
             break
 
 
-def run_workers(num_workers):
+def run_workers(num_workers: int) -> None:
     threads = []
     for _ in range(num_workers):
         thread = threading.Thread(target=worker)
@@ -248,7 +268,7 @@ def run_workers(num_workers):
             thread.join(1)
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Tiny multi-server automation tool.")
     parser.add_argument("--version", action="version", version=__version__)
     parser.add_argument("--verbose", action="store_true", help=HELP["verbose"])
@@ -312,7 +332,7 @@ def parse_args():
     return args
 
 
-def main():
+def main() -> int:
     # Avoid throwing exception on SIGPIPE.
     signal.signal(signal.SIGPIPE, signal.SIG_DFL)
     args = parse_args()
