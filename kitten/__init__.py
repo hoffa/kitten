@@ -54,7 +54,7 @@ log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
 log.addHandler(logging.StreamHandler(sys.stdout))
 
-tasks: queue.Queue[TaskFunc] = queue.Queue()
+tasks: "queue.Queue[TaskFunc]" = queue.Queue()
 stop = threading.Event()
 num_success = 0
 lock = threading.Lock()
