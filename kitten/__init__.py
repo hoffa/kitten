@@ -13,7 +13,7 @@ import threading
 import boto3
 import fabric
 
-__version__ = "0.5.2"
+__version__ = "0.6.1"
 
 CHUNK_SIZE = 50
 DEFAULT = {"threads": 10, "timeout": 10}
@@ -320,6 +320,7 @@ def main():
         logging.basicConfig(level=logging.DEBUG)
     if args.tool == "ip":
         print_ip_addrs(get_ip_addrs(args.values, args.kind, args.region), args.public)
+        return 0
     else:
         for task in get_tasks(args):
             tasks.put_nowait(task)
