@@ -5,7 +5,7 @@ with open("README.rst") as f:
 
 setuptools.setup(
     name="kitten",
-    version="0.6.1",
+    version="0.6.2",
     author="Chris Rehn",
     author_email="chris@rehn.me",
     description="Tiny multi-server automation tool.",
@@ -13,7 +13,7 @@ setuptools.setup(
     url="https://github.com/hoffa/kitten",
     packages=setuptools.find_packages(),
     entry_points={"console_scripts": {"kitten=kitten:main"}},
-    install_requires=["boto3>=1.9", "fabric>=2.4"],
+    install_requires=["boto3", "fabric>=2.4"],
     setup_requires=["pytest-runner"],
     tests_require=["pytest"],
     license="MIT",

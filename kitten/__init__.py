@@ -30,7 +30,7 @@ TaskFunc = Callable[[], None]
 Ip = Dict[str, Optional[str]]
 Filters = List[Dict[str, Union[str, List[str]]]]
 
-__version__ = "0.6.1"
+__version__ = "0.6.2"
 
 CHUNK_SIZE = 50
 DEFAULT = {"threads": 10, "timeout": 10}
