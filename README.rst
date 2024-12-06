@@ -1,8 +1,12 @@
-kitten |travis|
-===============
+kitten
+======
 
-.. |travis| image:: https://github.com/hoffa/kitten/workflows/.github/workflows/workflow.yml/badge.svg
-   :target: https://github.com/hoffa/kitten/actions
+.. image:: https://img.shields.io/pypi/v/kitten
+   :alt: PyPI - Version
+   :target: https://pypi.org/project/kitten
+.. image:: https://img.shields.io/pypi/dm/kitten
+   :alt: PyPI - Downloads
+   :target: https://pypi.org/project/kitten
 
 Tiny multi-server automation tool.
 
